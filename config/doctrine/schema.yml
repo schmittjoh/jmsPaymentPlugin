@@ -1,0 +1,281 @@
+options:
+  type:         InnoDB
+  charset:      utf8
+  collate:      utf8_unicode_ci
+
+################
+### Currency ###
+################
+# For a detailed overview which abbreviation represents what currency, 
+# see http://www.ecb.europa.eu/stats/exchange/eurofxref/html/index.en.html
+Currency:
+  tableName: currencies
+  actAs:
+    Timestampable:
+      created:
+        disabled: true
+    Versionable:
+      auditLog: true
+      deleteVersions: false
+  columns:
+    id:
+      type: integer(11)
+      primary: true
+      autoincrement: true
+      unsigned: true
+    code:
+      type: string(3)
+      notnull: true
+      unique: true
+    rate:
+      type: decimal
+      scale: 7
+      comment: This rate is relative to the euro; basically it says what amount 1 EUR equals in this currency.
+
+#########################
+### Payment Listeners ###
+#########################
+PaymentListener:
+  tableName: payment_listeners
+  options:
+    comment: This holds the listeners that are registered on specific payments.
+    type:         InnoDB
+    charset:      utf8
+    collate:      utf8_unicode_ci
+    symfony:
+      form: false
+      filter: false
+  relations:
+    Payment:
+      foreignAlias: Listeners
+      local: payment_id
+      foreign: id
+      type: one
+      foreignType: many
+  columns:
+    payment_id:
+      type: integer(11)
+      unsigned: true
+      primary: true
+      autoincrement: false
+    listener_id:
+      type: string(115)
+      primary: true
+      notnull: true
+    listener_type:
+      type: string(115)
+      primary: true
+      notnull: true
+
+###############################################
+### Financial Transactions with sub classes ###
+###############################################
+FinancialTransaction:
+  tableName: financial_transactions
+  options:
+    type:         InnoDB
+    charset:      utf8
+    collate:      utf8_unicode_ci
+    symfony:
+      form: false
+      filter: false
+  actAs:
+    Timestampable: ~
+  relations:
+    Payment:
+      foreignAlias: Transactions
+      local: payment_id
+      foreign: id
+      type: one
+      foreignType: many
+  columns:
+    id:
+      type: integer(11)
+      primary: true
+      autoincrement: true
+      unsigned: true
+    type:
+      type: string(25)
+      notnull: true
+    payment_id:
+      type: integer(11)
+      unsigned: true
+      notnull: true
+    currency:
+      type: enum
+      values: [EUR, USD, JPY, BGN, CZK, DKK, EEK, GBP, HUF, LTL, LVL, PLN, RON, SEK, CHF, NOK, HRK, RUB, TRY, AUD, BRL, CAD, CNY, HKD, IDR, INR, KRW, MXN, MYR, NZD, PHP, SGD, THB, ZAR]
+      default: EUR
+      comment: This might be different from the currency of the payment; by default, both are equal.
+    requested_amount:
+      type: decimal
+      scale: 5
+    processed_amount:
+      type: decimal
+      scale: 5
+    state:
+      type: integer(1)
+      notnull: true
+      unsigned: true
+      default: 1
+    response_code:
+      type: string(255)
+      notnull: false
+      default: null
+      comment: Primary error code that is used to determine whether a transaction was successful or not.
+    reason_code:
+      type: string(255)
+      notnull: false
+      default: null
+      comment: Secondary error code that is used to determine what exactly went wrong if anything.
+      
+FinancialApproveTransaction:
+  options:
+    type:         InnoDB
+    charset:      utf8
+    collate:      utf8_unicode_ci
+    symfony:
+      form: false
+      filter: false
+  inheritance:
+    extends: FinancialTransaction
+    type: column_aggregation
+    keyField: type
+    keyValue: approve
+    
+FinancialDepositTransaction:
+  options:
+    type:         InnoDB
+    charset:      utf8
+    collate:      utf8_unicode_ci
+    symfony:
+      form: false
+      filter: false
+  inheritance:
+    extends: FinancialTransaction
+    type: column_aggregation
+    keyField: type
+    keyValue: deposit
+
+FinancialReverseApprovalTransaction:
+  options:
+    type:         InnoDB
+    charset:      utf8
+    collate:      utf8_unicode_ci
+    symfony:
+      form: false
+      filter: false
+  inheritance:
+    extends: FinancialTransaction
+    type: column_aggregation
+    keyField: type
+    keyValue: reverseApproval
+
+FinancialReverseDepositTransaction:
+  options:
+    type:         InnoDB
+    charset:      utf8
+    collate:      utf8_unicode_ci
+    symfony:
+      form: false
+      filter: false
+  inheritance:
+    extends: FinancialTransaction
+    type: column_aggregation
+    keyField: type
+    keyValue: reverseDeposit
+    
+#########################
+### Payment Container ###
+#########################
+Payment:
+  tableName: payments
+  actAs:
+    Timestampable: ~
+  columns:
+    id:
+      type: integer(11)
+      primary: true
+      autoincrement: true
+      unsigned: true
+    target_amount:
+      comment: The requested target amount for this Payment.
+      type: decimal
+      scale: 5
+      notnull: true
+    approved_amount:
+      type: decimal
+      scale: 5
+      notnull: true
+    approving_amount:
+      type: decimal
+      scale: 5
+      notnull: true
+    deposited_amount:
+      type: decimal
+      scale: 5
+      notnull: true
+    depositing_amount:
+      type: decimal
+      scale: 5
+      notnull: true
+    currency:
+      type: enum
+      values: [EUR, USD, JPY, BGN, CZK, DKK, EEK, GBP, HUF, LTL, LVL, PLN, RON, SEK, CHF, NOK, HRK, RUB, TRY, AUD, BRL, CAD, CNY, HKD, IDR, INR, KRW, MXN, MYR, NZD, PHP, SGD, THB, ZAR]
+      default: EUR
+      notnull: true
+    state:
+      type: integer(1)
+      unsigned: true
+      default: 1
+      notnull: true
+ 
+#####################
+### Extended Data ###
+#####################
+PaymentData:
+  tableName: payment_data
+  actAs:
+    Timestampable: ~
+  relations:
+    Payment:
+      foreignAlias: DataContainer
+      local: payment_id
+      foreign: id
+      type: one
+      foreignType: one
+  columns:
+    payment_id:
+      primary: true
+      type: integer(11)
+      unsigned: true
+      notnull: false
+    method_class_name:
+      type: string(100)
+      notnull: true
+      comment: The class name of the payment method that this data represents.
+    subject:
+      type: string(255)
+      notnull: true
+      comment: The subject that is displayed to the client in the given locale.
+    internal_reference_number:
+      type: string(255)
+      notnull: false
+      default: null
+      comment: This is purely optional, and can be used by the payment method class internally (e.g. PayPalPaymentMethod).
+    external_reference_number:
+      type: string(255)
+      notnull: false
+      default: null
+      comment: This is a reference number generated by the actual payment method provider (e.g. PayPal itself).
+
+PaypalPaymentData:
+  inheritance:
+    extends: PaymentData
+    type: column_aggregation
+    keyField: method_class_name
+    keyValue: jmsPaypalPaymentMethod
+  columns:
+    express_url:
+      type: string(2048)
+      notnull: false
+      default: null

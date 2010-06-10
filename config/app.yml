@@ -1,0 +1,6 @@
+all:
+  jmsPaymentPlugin:
+    paypal:
+      username: 'Your paypal username'
+      signature: 'Your paypal signature'
+      password: 'Your paypal password'
