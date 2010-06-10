@@ -1,5 +1,6 @@
 all:
   jmsPaymentPlugin:
+    # You can overwrite these values in your global app.yml
     paypal:
       username: 'Your paypal username'
       signature: 'Your paypal signature'
