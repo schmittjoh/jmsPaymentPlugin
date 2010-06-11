@@ -212,6 +212,7 @@ abstract class PluginPayment extends BasePayment
   /**
    * Registers a payment listener
    * @param Doctrine_Record $listener
+   * TODO: Allow to register for a specific event
    */
   public final function registerListener(Doctrine_Record $listener)
   {
