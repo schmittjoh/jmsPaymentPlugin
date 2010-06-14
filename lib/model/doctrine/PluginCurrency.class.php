@@ -28,12 +28,12 @@
  */
 abstract class PluginCurrency extends BaseCurrency
 {
-	/**
-	 * Make sure we always return a float, and not a string.
-	 * @return float
-	 */
+  /**
+   * Make sure we always return a float, and not a string.
+   * @return float
+   */
   public final function getRate()
   {
-  	return floatval($this->_get('rate'));
+    return floatval($this->_get('rate'));
   }
 }

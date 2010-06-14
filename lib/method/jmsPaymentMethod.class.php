@@ -17,44 +17,44 @@
 
 class jmsPaymentMethod implements jmsPaymentMethodInterface
 {
-	/**
-	 * @see plugins/jmsPaymentPlugin/lib/interface/jmsPaymentMethodInterface#approve($data, $retry)
-	 */
-	public function approve(jmsPaymentMethodData $data, $retry = false)
-	{
-		throw new jmsPaymentFunctionNotSupportedException;
-	}
-	
-	/**
-	 * At least, this method must be overwritten. The others are optional.
-	 * @see plugins/jmsPaymentPlugin/lib/interface/jmsPaymentMethodInterface#deposit($data, $retry)
-	 */
-	public function deposit(jmsPaymentMethodData $data, $retry = false)
-	{
-		throw new jmsPaymentFunctionNotSupportedException;
-	}
-	
-	/**
-	 * @see plugins/jmsPaymentPlugin/lib/interface/jmsPaymentMethodInterface#reverseApproval($data, $retry)
-	 */
-	public function reverseApproval(jmsPaymentMethodData $data, $retry = false)
-	{
-		throw new jmsPaymentFunctionNotSupportedException;
-	}
-	
-	/**
-	 * @see plugins/jmsPaymentPlugin/lib/interface/jmsPaymentMethodInterface#reverseDeposit($data, $retry)
-	 */
-	public function reverseDeposit(jmsPaymentMethodData $data, $retry = false)
-	{
-		throw new jmsPaymentFunctionNotSupportedException;
-	}
+  /**
+   * @see plugins/jmsPaymentPlugin/lib/interface/jmsPaymentMethodInterface#approve($data, $retry)
+   */
+  public function approve(jmsPaymentMethodData $data, $retry = false)
+  {
+    throw new jmsPaymentFunctionNotSupportedException;
+  }
+  
+  /**
+   * At least, this method must be overwritten. The others are optional.
+   * @see plugins/jmsPaymentPlugin/lib/interface/jmsPaymentMethodInterface#deposit($data, $retry)
+   */
+  public function deposit(jmsPaymentMethodData $data, $retry = false)
+  {
+    throw new jmsPaymentFunctionNotSupportedException;
+  }
+  
+  /**
+   * @see plugins/jmsPaymentPlugin/lib/interface/jmsPaymentMethodInterface#reverseApproval($data, $retry)
+   */
+  public function reverseApproval(jmsPaymentMethodData $data, $retry = false)
+  {
+    throw new jmsPaymentFunctionNotSupportedException;
+  }
+  
+  /**
+   * @see plugins/jmsPaymentPlugin/lib/interface/jmsPaymentMethodInterface#reverseDeposit($data, $retry)
+   */
+  public function reverseDeposit(jmsPaymentMethodData $data, $retry = false)
+  {
+    throw new jmsPaymentFunctionNotSupportedException;
+  }
 
   /**
    * @see plugins/jmsPaymentPlugin/lib/interface/jmsPaymentMethodInterface#isDebug()
    */
   protected function isDebug()
   {
-  	return sfConfig::get('sf_debug', false);
+    return sfConfig::get('sf_debug', false);
   }
 }

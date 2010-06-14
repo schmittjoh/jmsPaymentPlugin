@@ -25,38 +25,38 @@
  */
 class PluginCurrencyTable extends Doctrine_Table
 {
-	/**
-	 * Local cache for currencies
-	 * @var array
-	 */
-	private $_currencies;
+  /**
+   * Local cache for currencies
+   * @var array
+   */
+  private $_currencies;
 
-	/**
-	 * Returns an array of currency instances where the keys are the
-	 * respective currency codes.
-	 * 
-	 * @return array
-	 */
-	public final function getCurrencies()
-	{
-		if ($this->_currencies === null)
-		{
-			// TODO: This can be cached
-			$this->_currencies = Doctrine_Query::create()
-			                      ->from('Currency c INDEXBY c.code')
-				            		    ->execute()
-				            		    ->getData();
-		}
-		
-		return $this->_currencies;
-	}
-	
-	/**
-	 * Returns the currency for the given code
-	 * 
-	 * @param string $code a currency code, e.g. EUR
-	 * @return Currency
-	 */
+  /**
+   * Returns an array of currency instances where the keys are the
+   * respective currency codes.
+   * 
+   * @return array
+   */
+  public final function getCurrencies()
+  {
+    if ($this->_currencies === null)
+    {
+      // TODO: This can be cached
+      $this->_currencies = Doctrine_Query::create()
+                            ->from('Currency c INDEXBY c.code')
+                            ->execute()
+                            ->getData();
+    }
+    
+    return $this->_currencies;
+  }
+  
+  /**
+   * Returns the currency for the given code
+   * 
+   * @param string $code a currency code, e.g. EUR
+   * @return Currency
+   */
   public final function getCurrency($code)
   {
     $currencies = $this->getCurrencies();
@@ -78,11 +78,11 @@ class PluginCurrencyTable extends Doctrine_Table
    */
   public final function convertAmount($amount, $from, $to)
   {
-  	$amount = floatval($amount);
-  	
-  	if ($from === $to)
-  	  return $amount;
-  	
+    $amount = floatval($amount);
+    
+    if ($from === $to)
+      return $amount;
+    
     $from = $this->getCurrency($from);
     $to = $this->getCurrency($to);
     

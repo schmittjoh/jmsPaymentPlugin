@@ -17,44 +17,44 @@
 
 class jmsPaymentEvent
 {
-	private $_name;
-	private $_target;
-	private $_preventDefault = false;
-	private $_stopPropagation = false;
-	
-	public function __construct($name, $target)
-	{
-		$this->_name = $name;
-		$this->_target = $target;
-	}
+  private $_name;
+  private $_target;
+  private $_preventDefault = false;
+  private $_stopPropagation = false;
+  
+  public function __construct($name, $target)
+  {
+    $this->_name = $name;
+    $this->_target = $target;
+  }
 
-	public final function getName() 
-	{
-		return $this->_name;
-	}
-	
-	public final function getTarget()
-	{
-		return $this->_target;
-	}
-	
-	public final function isPreventDefault()
-	{
-		return $this->_preventDefault;
-	}
-	
-	public final function preventDefault()
-	{
-		$this->_preventDefault = true;
-	}
-	
-	public final function isStopPropagation()
-	{
-		return $this->_stopPropagation;
-	}
-	
-	public final function stopPropagation()
-	{
-		$this->_stopPropagation = true;
-	}
+  public final function getName() 
+  {
+    return $this->_name;
+  }
+  
+  public final function getTarget()
+  {
+    return $this->_target;
+  }
+  
+  public final function isPreventDefault()
+  {
+    return $this->_preventDefault;
+  }
+  
+  public final function preventDefault()
+  {
+    $this->_preventDefault = true;
+  }
+  
+  public final function isStopPropagation()
+  {
+    return $this->_stopPropagation;
+  }
+  
+  public final function stopPropagation()
+  {
+    $this->_stopPropagation = true;
+  }
 }

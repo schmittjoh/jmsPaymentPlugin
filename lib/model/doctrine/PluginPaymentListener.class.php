@@ -28,10 +28,10 @@
  */
 abstract class PluginPaymentListener extends BasePaymentListener
 {
-	/**
-	 * A map of cached handler instances which process the triggered events
-	 * @var array
-	 */
+  /**
+   * A map of cached handler instances which process the triggered events
+   * @var array
+   */
   private static $_handlers = array();
   
   /**
@@ -40,11 +40,11 @@ abstract class PluginPaymentListener extends BasePaymentListener
    */
   public final function setHandler(Doctrine_Record $handler)
   {
-  	if (self::getSingleColumnListenerId($handler) !== $this->listener_id
-  	    || $handler->getTable()->getComponentName() !== $this->listener_type)
-  	    throw new InvalidArgumentException('This handler is invalid.');
-  	    
-    self::$_handlers[$this->getIdAsString()] = $handler;	
+    if (self::getSingleColumnListenerId($handler) !== $this->listener_id
+        || $handler->getTable()->getComponentName() !== $this->listener_type)
+        throw new InvalidArgumentException('This handler is invalid.');
+        
+    self::$_handlers[$this->getIdAsString()] = $handler;  
   }
   
   /**
@@ -56,52 +56,52 @@ abstract class PluginPaymentListener extends BasePaymentListener
    */
   public final function getHandler()
   {
-  	$id = $this->getIdAsString(); 
-  	if (!isset(self::$_handlers[$id]))
-  	{
-  		$table = Doctrine_Core::getTable($this->listener_type);
-  		
-  		// restore the listener id to it's original value
-  		if (count((array) $table->getIdenfifier()) > 1)
-  		{
-  			$listenerId = unserialize($this->listener_id);
-  		}
-  		else
-  		{
-  			$listenerId = array(reset($table->getIdentifier()) => $this->listener_id);
-  		}
-  		
-  		// check if the table implements the jmsPaymentListenerTableInterface
-  		if ($table instanceof jmsPaymentListenerTableInterface)
-  		{
-  			$handler = $table->findPaymentEventHandler($listenerId);
-  		}
-  		// if not, we just fetch the handler object without any relations
-  		else
-  		{
-  			$q = $table->createQuery('h');
-  			
-  			foreach ($listenerId as $column => $value)
-  			  $q->andWhere(sprintf('h.%s = ?', $column), $value);
-  			  
-  			$handler = $q->fetchOne();
-  		}
-  		
-  		// check if the handler exists (maybe it got deleted?)
-  		if (!$handler)
-  		  throw new jmsPaymentEventHandlerDeletedException(
-  		    'Could not find event handler.');
-  		
-  		self::$_handlers[$id] = $handler;
-  	}
-  	
-  	// This can be the case, if the record has been deleted after it was cached.
-  	// In these cases, the record will be transient again.
-  	if (self::$_handlers[$id]->exists() === false)
-  	  throw new jmsPaymentEventHandlerDeletedException(
-  	    'Event handler was deleted.');
-  	
-  	return self::$_handlers[$id];
+    $id = $this->getIdAsString(); 
+    if (!isset(self::$_handlers[$id]))
+    {
+      $table = Doctrine_Core::getTable($this->listener_type);
+      
+      // restore the listener id to it's original value
+      if (count((array) $table->getIdenfifier()) > 1)
+      {
+        $listenerId = unserialize($this->listener_id);
+      }
+      else
+      {
+        $listenerId = array(reset($table->getIdentifier()) => $this->listener_id);
+      }
+      
+      // check if the table implements the jmsPaymentListenerTableInterface
+      if ($table instanceof jmsPaymentListenerTableInterface)
+      {
+        $handler = $table->findPaymentEventHandler($listenerId);
+      }
+      // if not, we just fetch the handler object without any relations
+      else
+      {
+        $q = $table->createQuery('h');
+        
+        foreach ($listenerId as $column => $value)
+          $q->andWhere(sprintf('h.%s = ?', $column), $value);
+          
+        $handler = $q->fetchOne();
+      }
+      
+      // check if the handler exists (maybe it got deleted?)
+      if (!$handler)
+        throw new jmsPaymentEventHandlerDeletedException(
+          'Could not find event handler.');
+      
+      self::$_handlers[$id] = $handler;
+    }
+    
+    // This can be the case, if the record has been deleted after it was cached.
+    // In these cases, the record will be transient again.
+    if (self::$_handlers[$id]->exists() === false)
+      throw new jmsPaymentEventHandlerDeletedException(
+        'Event handler was deleted.');
+    
+    return self::$_handlers[$id];
   }
   
   /**
@@ -110,7 +110,7 @@ abstract class PluginPaymentListener extends BasePaymentListener
    */
   private function getIdAsString()
   {
-  	return implode('.', $this->identifier());
+    return implode('.', $this->identifier());
   }
   
   /**
@@ -119,7 +119,7 @@ abstract class PluginPaymentListener extends BasePaymentListener
    */
   public final function postDelete($event)
   {
-  	unset(self::$_handlers[$this->getIdAsString()]);
+    unset(self::$_handlers[$this->getIdAsString()]);
   }
 
   /**
@@ -134,6 +134,6 @@ abstract class PluginPaymentListener extends BasePaymentListener
     if (count($id) > 1)
       return serialize($id);
     
-    return strval(reset($id));  	
+    return strval(reset($id));    
   }
 }

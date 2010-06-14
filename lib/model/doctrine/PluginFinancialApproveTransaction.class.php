@@ -29,67 +29,67 @@ abstract class PluginFinancialApproveTransaction extends BaseFinancialApproveTra
 {
   protected final function doExecute()
   {
-  	$data = $this->getPaymentMethodData();
-  	$method = $this->getPaymentMethodInstance();
-  	$payment = $this->Payment;
-  	$currencyTable = Doctrine_Core::getTable('Currency');
+    $data = $this->getPaymentMethodData();
+    $method = $this->getPaymentMethodInstance();
+    $payment = $this->Payment;
+    $currencyTable = Doctrine_Core::getTable('Currency');
 
-  	$payment->state = Payment::STATE_APPROVING;
-  	$approvingAmount = $currencyTable->convertAmount(
-  	  $data->getAmount(), $data->getCurrency(), $payment->currency
-  	);
-  	
-  	if ($this->isFirstExecution())
-  	  $payment->approving_amount += $approvingAmount;
-  	
-  	try 
-  	{
-	  	// execute the transaction
-	  	$method->approve($data);
-	  	
-	  	$payment->approving_amount -= $approvingAmount;
-	  	
-	  	$approvedAmount = $currencyTable->convertAmount(
-	  	  $data->getProcessedAmount(), $data->getCurrency(), $payment->currency
-	  	);
-	  	$payment->approved_amount += $approvedAmount;
-	  	
+    $payment->state = Payment::STATE_APPROVING;
+    $approvingAmount = $currencyTable->convertAmount(
+      $data->getAmount(), $data->getCurrency(), $payment->currency
+    );
+    
+    if ($this->isFirstExecution())
+      $payment->approving_amount += $approvingAmount;
+    
+    try 
+    {
+      // execute the transaction
+      $method->approve($data);
+      
+      $payment->approving_amount -= $approvingAmount;
+      
+      $approvedAmount = $currencyTable->convertAmount(
+        $data->getProcessedAmount(), $data->getCurrency(), $payment->currency
+      );
+      $payment->approved_amount += $approvedAmount;
+      
       // set the payment to APPROVED if the approved amount is greater or equal
       // to the target amount of the payment
-	  	if ($payment->approved_amount >= $payment->target_amount)
-	  	  $payment->state = Payment::STATE_APPROVED;
-	  	
-	  	return $data;
-  	}
-  	catch (jmsPaymentException $e)
-  	{
-  		if (!$e instanceof jmsPaymentUserActionRequiredException)
-  		  $payment->approving_amount -= $approvingAmount;
-  		
-	    // if the approve function is not supported, this is considered 
-	    // to be a successful approval (this is the best guess we can make)
-  		if ($e instanceof jmsPaymentFunctionNotSupportedException)
-  		{
-  			$payment->approved_amount += $approvingAmount;
-  			
-  			if ($payment->approved_amount >= $payment->target_amount)
-  			  $payment->state = Payment::STATE_APPROVED;
-  			
-  		  return $data;
-  		}
-  		
-  		// re-throw exception
-  		throw $e;
-  	}
+      if ($payment->approved_amount >= $payment->target_amount)
+        $payment->state = Payment::STATE_APPROVED;
+      
+      return $data;
+    }
+    catch (jmsPaymentException $e)
+    {
+      if (!$e instanceof jmsPaymentUserActionRequiredException)
+        $payment->approving_amount -= $approvingAmount;
+      
+      // if the approve function is not supported, this is considered 
+      // to be a successful approval (this is the best guess we can make)
+      if ($e instanceof jmsPaymentFunctionNotSupportedException)
+      {
+        $payment->approved_amount += $approvingAmount;
+        
+        if ($payment->approved_amount >= $payment->target_amount)
+          $payment->state = Payment::STATE_APPROVED;
+        
+        return $data;
+      }
+      
+      // re-throw exception
+      throw $e;
+    }
   }
   
   public final function setRequestedAmount($amount)
   {
     if ($amount > $max = $this->requested_amount + 
-	        Doctrine_Core::getTable('Currency')->convertAmount(
-	          $this->Payment->getPendingAmount(), $this->Payment->currency, $this->currency
-	        ) 
-	  )
+          Doctrine_Core::getTable('Currency')->convertAmount(
+            $this->Payment->getPendingAmount(), $this->Payment->currency, $this->currency
+          ) 
+    )
       throw new InvalidArgumentException(
         '$amount cannot be greater than '.$max.', given: '.$amount.'.');
 
@@ -98,12 +98,12 @@ abstract class PluginFinancialApproveTransaction extends BaseFinancialApproveTra
   
   protected final function canBePerformedOn(Payment $payment)
   {
-  	return $payment->state === Payment::STATE_NEW
-  	       || 
-  	       (
-  	         $payment->state === Payment::STATE_APPROVING 
-  	         && $payment->approved_amount < $payment->target_amount
-  	       )
-  	;
+    return $payment->state === Payment::STATE_NEW
+           || 
+           (
+             $payment->state === Payment::STATE_APPROVING 
+             && $payment->approved_amount < $payment->target_amount
+           )
+    ;
   }
 }

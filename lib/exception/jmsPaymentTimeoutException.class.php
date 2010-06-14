@@ -23,5 +23,5 @@
  */
 class jmsPaymentTimeoutException extends jmsPaymentException
 {
-	
+  
 }

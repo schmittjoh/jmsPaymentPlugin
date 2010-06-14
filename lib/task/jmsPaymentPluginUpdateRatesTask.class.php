@@ -59,16 +59,16 @@ EOF;
     list($rates) = $this->getRates();
     foreach ($rates as $rateInfo)
     {
-    	list($code, $rate) = $rateInfo;
-    	$currency = Doctrine_Core::getTable('Currency')->findOneByCode($code);
-    	if (!$currency)
-    	{ 
-    	  $currency = new Currency();
-    	  $currency->code = $code;
-    	}
-    	
-    	$currency->rate = $rate;
-    	$currency->save();
+      list($code, $rate) = $rateInfo;
+      $currency = Doctrine_Core::getTable('Currency')->findOneByCode($code);
+      if (!$currency)
+      { 
+        $currency = new Currency();
+        $currency->code = $code;
+      }
+      
+      $currency->rate = $rate;
+      $currency->save();
     }
     
     $this->logSection('payment', 'Exchange rates have been updated.');
@@ -76,32 +76,32 @@ EOF;
   
   protected function getRates()
   {
-	  //Read eurofxref-daily.xml file in memory 
-	  $XMLContent= file("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
-	  //the file is updated daily between 2.15 p.m. and 3.00 p.m. CET
-	  $exchangeRates = array();
-	  $date = "";
-	  $found = false;
-	  foreach ($XMLContent as $line) 
-	  {
-	    if(!$found && ereg("time='([[:graph:]]+)'",$line,$validityDate))
-	    {
-	      $date = $validityDate[1];
-	      $found = true;
-	    }
-	    if (ereg("currency='([[:alpha:]]+)'",$line,$currencyCode)) 
-	    {
-	      if (ereg("rate='([[:graph:]]+)'",$line,$rate)) 
-	      {
-	        array_push($exchangeRates, array($currencyCode[1], $rate[1]));
-	      }
-	    }
-	  }
-	  
-	  // EUR is not in the exchange rates, but still is a currency; so, we need
-	  // to add it manually
-	  $exchangeRates[] = array('EUR', 1.0);
-	  
-	  return array($exchangeRates, $date);
+    //Read eurofxref-daily.xml file in memory 
+    $XMLContent= file("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
+    //the file is updated daily between 2.15 p.m. and 3.00 p.m. CET
+    $exchangeRates = array();
+    $date = "";
+    $found = false;
+    foreach ($XMLContent as $line) 
+    {
+      if(!$found && ereg("time='([[:graph:]]+)'",$line,$validityDate))
+      {
+        $date = $validityDate[1];
+        $found = true;
+      }
+      if (ereg("currency='([[:alpha:]]+)'",$line,$currencyCode)) 
+      {
+        if (ereg("rate='([[:graph:]]+)'",$line,$rate)) 
+        {
+          array_push($exchangeRates, array($currencyCode[1], $rate[1]));
+        }
+      }
+    }
+    
+    // EUR is not in the exchange rates, but still is a currency; so, we need
+    // to add it manually
+    $exchangeRates[] = array('EUR', 1.0);
+    
+    return array($exchangeRates, $date);
   }
 }

@@ -22,9 +22,9 @@
  */
 interface jmsPaymentListenerInterface
 {
-	/**
-	 * This method is called if a payment event occurs.
+  /**
+   * This method is called if a payment event occurs.
    * @param jmsPaymentEvent $event
-	 */
-	public function handlePaymentEvent(jmsPaymentEvent $event);
+   */
+  public function handlePaymentEvent(jmsPaymentEvent $event);
 }

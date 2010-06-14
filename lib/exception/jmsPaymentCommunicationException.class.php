@@ -23,5 +23,5 @@
  */
 class jmsPaymentCommunicationException extends jmsPaymentException
 {
-	
+  
 }

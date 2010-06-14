@@ -30,13 +30,13 @@
  */
 interface jmsPaymentListenerTableInterface
 {
-	/**
-	 * Returns the object with the given id which is responsible
-	 * for handling the payment events.
-	 * 
-	 * @param array $id This is the primary key of the record, e.g.
-	 *                  array('id' => 5), or array('id' => 5, 'type' => 'blub')
-	 * @return mixed An instance of Doctrine_Record, or false
-	 */
-	public function findPaymentEventHandler($id);
+  /**
+   * Returns the object with the given id which is responsible
+   * for handling the payment events.
+   * 
+   * @param array $id This is the primary key of the record, e.g.
+   *                  array('id' => 5), or array('id' => 5, 'type' => 'blub')
+   * @return mixed An instance of Doctrine_Record, or false
+   */
+  public function findPaymentEventHandler($id);
 }

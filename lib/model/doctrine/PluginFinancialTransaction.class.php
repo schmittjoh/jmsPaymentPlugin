@@ -106,45 +106,45 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
   public final static function create($type, Payment $payment, $amount = null, 
      $currency = null)
   {
-  	$class = sprintf('Financial%sTransaction', $type);
-  	
-  	// validate currency
+    $class = sprintf('Financial%sTransaction', $type);
+    
+    // validate currency
     if ($currency === null)
       $currency = $payment->currency;
     if (!in_array($currency, self::getAllowedCurrencies(), true))
-      throw new InvalidArgumentException('$currency has an invalid value.');  	
-  	
-  	// this is only for convenience, since in most cases you won't need to make
-  	// more than one transaction of each type
-  	if ($amount === null)
-  	{
-  		if ($type === self::TYPE_REVERSE_APPROVAL)
-  		  $amount = $payment->approved_amount;
-  		else if ($type === self::TYPE_REVERSE_DEPOSIT)
-  		  $amount = $payment->deposited_amount;
-  		else
-  	    $amount = $payment->getPendingAmount();
-  	  
-  	  // we need to convert this amount using the current rate in case the 
-  	  // currencies are not equal
-  	  $amount = Doctrine_Core::getTable('Currency')->convertAmount(
-  	    $amount, $payment->currency, $currency
-  	  );
-  	}
-  	
-  	// verify that the payment has no open transactions
-  	if ($payment->hasOpenTransaction() === true)
-  	  throw new RuntimeException(
-  	    'Each payment can only have one open transaction at a time.');
-  	  
-  	$transaction = new $class;
+      throw new InvalidArgumentException('$currency has an invalid value.');    
+    
+    // this is only for convenience, since in most cases you won't need to make
+    // more than one transaction of each type
+    if ($amount === null)
+    {
+      if ($type === self::TYPE_REVERSE_APPROVAL)
+        $amount = $payment->approved_amount;
+      else if ($type === self::TYPE_REVERSE_DEPOSIT)
+        $amount = $payment->deposited_amount;
+      else
+        $amount = $payment->getPendingAmount();
+      
+      // we need to convert this amount using the current rate in case the 
+      // currencies are not equal
+      $amount = Doctrine_Core::getTable('Currency')->convertAmount(
+        $amount, $payment->currency, $currency
+      );
+    }
+    
+    // verify that the payment has no open transactions
+    if ($payment->hasOpenTransaction() === true)
+      throw new RuntimeException(
+        'Each payment can only have one open transaction at a time.');
+      
+    $transaction = new $class;
     $transaction->_iKnowWhatImDoing = true;
     $transaction->setPaymentContainer($payment);
     $transaction->currency = $currency; 
     $transaction->requested_amount = $amount;
-  	$transaction->save();
-  	
-  	return $transaction;
+    $transaction->save();
+    
+    return $transaction;
   }
   
   /**
@@ -179,10 +179,10 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   public final static function isFinalState($state)
   {
-  	if (!isset(self::$_allowedStateTransitions[$state]))
-  	  throw new InvalidArgumentException('Invalid state: '.var_export($state, true));
-  	  
-  	return count(self::$_allowedStateTransitions[$state]) === 0;
+    if (!isset(self::$_allowedStateTransitions[$state]))
+      throw new InvalidArgumentException('Invalid state: '.var_export($state, true));
+      
+    return count(self::$_allowedStateTransitions[$state]) === 0;
   }
   
   /**
@@ -194,15 +194,15 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   public final function setState($state)
   {
-  	// do nothing if the state is not changed
-  	if ($state === $this->state)
-  	  return;
-  	
-  	// verify that the state change is allowed
-  	if (!in_array($state, self::$_allowedStateTransitions[$this->state], true))
-  	    throw new InvalidArgumentException('This target state is not allowed.');
-  	
-  	$this->_set('state', $state);
+    // do nothing if the state is not changed
+    if ($state === $this->state)
+      return;
+    
+    // verify that the state change is allowed
+    if (!in_array($state, self::$_allowedStateTransitions[$this->state], true))
+        throw new InvalidArgumentException('This target state is not allowed.');
+    
+    $this->_set('state', $state);
   }
   
   /**
@@ -211,15 +211,15 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   public function setRequestedAmount($amount)
   {      
-  	if ($this->state !== self::STATE_NEW)
-  	  throw new RuntimeException(
-  	    'The requested amount cannot be changed on not NEW transactions.');
+    if ($this->state !== self::STATE_NEW)
+      throw new RuntimeException(
+        'The requested amount cannot be changed on not NEW transactions.');
 
-  	$amount = floatval($amount);
+    $amount = floatval($amount);
     if ($amount <= 0.0)
       throw new InvalidArgumentException('$amount cannot be smaller or equal to 0.');
 
-  	$this->_set('requested_amount', $amount);
+    $this->_set('requested_amount', $amount);
   }
   
   /**
@@ -229,9 +229,9 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   public final function preInsert($event)
   {
-  	if ($this->_iKnowWhatImDoing === false)
-  	  throw new RuntimeException(
-  	    'Please use the static constructors to create financial transactions.');
+    if ($this->_iKnowWhatImDoing === false)
+      throw new RuntimeException(
+        'Please use the static constructors to create financial transactions.');
   }
   
   /**
@@ -240,16 +240,16 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   private function setPaymentContainer(Payment $payment)
   {
-  	if ($this->exists() !== false)
-  	  throw new RuntimeException(
-  	    'A payment container can only be set on transient transactions.');
-  	
-  	if ($this->canBePerformedOn($payment) === false)
-  	  throw new LogicException(
-  	    sprintf('"%s" cannot be performed on this payment.', get_class($this)));
-  	  
-  	$this->Payment = $payment;
-  	$payment->Transactions[] = $this;
+    if ($this->exists() !== false)
+      throw new RuntimeException(
+        'A payment container can only be set on transient transactions.');
+    
+    if ($this->canBePerformedOn($payment) === false)
+      throw new LogicException(
+        sprintf('"%s" cannot be performed on this payment.', get_class($this)));
+      
+    $this->Payment = $payment;
+    $payment->Transactions[] = $this;
   }
   
   /**
@@ -260,7 +260,7 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   protected final function isFirstExecution()
   {
-  	return $this->_isFirstExecution;
+    return $this->_isFirstExecution;
   }
   
   /**
@@ -271,7 +271,7 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   protected function canBePerformedOn(Payment $payment) 
   {
-  	throw new LogicException('The method "canBePerformedOn()" must be implemented by sub-classes.');
+    throw new LogicException('The method "canBePerformedOn()" must be implemented by sub-classes.');
   }
   
   /**
@@ -288,43 +288,43 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   public final function execute()
   {
-  	if ($this->state !== self::STATE_NEW 
-  	    && $this->state !== self::STATE_PENDING)
-  	  throw new RuntimeException(
-  	    'execute() can only be called on new, or pending transactions.');
-  	  
-  	if ($this->state === self::STATE_NEW)
-  	{
-  		$this->state = self::STATE_PENDING;
-  		$this->_isFirstExecution = true;
-  	}
-  	else
-  	  $this->_isFirstExecution = false;
-  	  
-  	try 
-  	{
-  	  $data = $this->doExecute();
-  	  $this->updateFromPaymentMethodData($data);
-  	  $this->state = self::STATE_SUCCESS;
-  	  $this->save();
-  	}
-  	catch (jmsPaymentException $e)
-  	{
-  		// anything except a jmsPaymentUserActionRequiredException will set
-  		// the transaction state to FAILED
-  		if (!$e instanceof jmsPaymentUserActionRequiredException)
-  		  $this->state = self::STATE_FAILED;
-  		
-  		// check if there is any persistent data linked to this exception
-  		if ($e->hasPaymentMethodData())
-  		  $this->updateFromPaymentMethodData($e->getPaymentMethodData());
-  		
-  		$this->save();
-  		  
-  		// re-throw exception so it can be processed at the point in the stack
-  		// where it fits best (definitely not here)
-  		throw $e;
-  	}
+    if ($this->state !== self::STATE_NEW 
+        && $this->state !== self::STATE_PENDING)
+      throw new RuntimeException(
+        'execute() can only be called on new, or pending transactions.');
+      
+    if ($this->state === self::STATE_NEW)
+    {
+      $this->state = self::STATE_PENDING;
+      $this->_isFirstExecution = true;
+    }
+    else
+      $this->_isFirstExecution = false;
+      
+    try 
+    {
+      $data = $this->doExecute();
+      $this->updateFromPaymentMethodData($data);
+      $this->state = self::STATE_SUCCESS;
+      $this->save();
+    }
+    catch (jmsPaymentException $e)
+    {
+      // anything except a jmsPaymentUserActionRequiredException will set
+      // the transaction state to FAILED
+      if (!$e instanceof jmsPaymentUserActionRequiredException)
+        $this->state = self::STATE_FAILED;
+      
+      // check if there is any persistent data linked to this exception
+      if ($e->hasPaymentMethodData())
+        $this->updateFromPaymentMethodData($e->getPaymentMethodData());
+      
+      $this->save();
+        
+      // re-throw exception so it can be processed at the point in the stack
+      // where it fits best (definitely not here)
+      throw $e;
+    }
   }
   
   /**
@@ -342,7 +342,7 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   protected function doExecute()
   {
-  	throw new RuntimeException('This needs to be overwritten by sub classes.');
+    throw new RuntimeException('This needs to be overwritten by sub classes.');
   }
   
   /**
@@ -351,10 +351,10 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   protected final function getPaymentMethodData()
   {
-  	$data = new jmsPaymentMethodData($this->requested_amount, $this->currency,
-  	             $this->Payment->DataContainer->toArray(false));
-  	
-  	return $data;
+    $data = new jmsPaymentMethodData($this->requested_amount, $this->currency,
+                 $this->Payment->DataContainer->toArray(false));
+    
+    return $data;
   }
   
   /**
@@ -363,14 +363,14 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   private function updateFromPaymentMethodData(jmsPaymentMethodData $data)
   {
-  	$this->response_code = $data->getResponseCode();
-  	$this->reason_code = $data->getReasonCode();
-  	$this->processed_amount = $data->getProcessedAmount();
-  	
-  	$dataContainer = $this->Payment->DataContainer;
-  	foreach ($data->getExtendedValues() as $name => $value)
-  	  $dataContainer->$name = $value;
-  	$this->Payment->DataContainer->save();
+    $this->response_code = $data->getResponseCode();
+    $this->reason_code = $data->getReasonCode();
+    $this->processed_amount = $data->getProcessedAmount();
+    
+    $dataContainer = $this->Payment->DataContainer;
+    foreach ($data->getExtendedValues() as $name => $value)
+      $dataContainer->$name = $value;
+    $this->Payment->DataContainer->save();
   }
   
   /**
@@ -379,14 +379,14 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   protected final function getPaymentMethodInstance()
   {
-  	$method = $this->Payment->DataContainer->method_class_name;
-  	
-  	if (!isset(self::$_paymentMethods[$method]))
-  	{
-  		self::$_paymentMethods[$method] = new $method();
-  	}
-  	
-  	return self::$_paymentMethods[$method];
+    $method = $this->Payment->DataContainer->method_class_name;
+    
+    if (!isset(self::$_paymentMethods[$method]))
+    {
+      self::$_paymentMethods[$method] = new $method();
+    }
+    
+    return self::$_paymentMethods[$method];
   }
   
   /**
@@ -397,7 +397,7 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   public final function getRequestedAmount()
   {
-  	return floatval($this->_get('requested_amount'));
+    return floatval($this->_get('requested_amount'));
   }
   
   /**
@@ -408,7 +408,7 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   public final function getProcessedAmount()
   {
-  	return floatval($this->_get('processed_amount'));
+    return floatval($this->_get('processed_amount'));
   }
   
   /**
@@ -417,7 +417,7 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */  
   public final function isInFinalState()
   {
-  	return self::isFinalState($this->state);
+    return self::isFinalState($this->state);
   }
   
   /**
@@ -428,7 +428,7 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   public final function cancel()
   {
-  	$this->state = self::STATE_CANCELED;
-  	$this->save();
+    $this->state = self::STATE_CANCELED;
+    $this->save();
   }
 }
