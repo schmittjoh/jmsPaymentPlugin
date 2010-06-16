@@ -23,114 +23,114 @@
  */
 class jmsPaypalPaymentMethod extends jmsPaymentMethod
 {
-	/**
-	 * @var CallerServices
-	 */
-	private $_callerServices;
-	
-	/**
-	 * We need to make some adjustments to the loading procedure, 
-	 * so we can use the PayPal API library
-	 */
-	public function __construct()
-	{
-		// unfortunately, the PayPal API was not made for PHP 5
-		// so, we need to disable some error checks
-		error_reporting(E_ERROR | E_WARNING | E_PARSE);
-		
-		// append the PayPal API base dir to the include path
-		ini_set('include_path', ini_get('include_path').PATH_SEPARATOR
-														.dirname(__FILE__).'/../vendor/PayPal/');
-		
-		require_once 'PayPal.php';
-		require_once 'PayPal/Profile/Handler/Array.php';
-		require_once 'PayPal/Profile/API.php';
-	}
-	
-	/**
-	 * Approves the transaction
-	 * @see plugins/jmsPaymentPlugin/lib/method/jmsPaymentMethod#approve($data, $retry)
-	 */
-	public function approve(jmsPaymentMethodData $data, $retry = false)
-	{
-		try 
-		{
-			$data = $this->_approve($data);
-			return $data;
-		}
-		catch (Exception $e)
-		{
-			if (!$e instanceof jmsPaymentUserActionRequiredException && $retry)
-				return $this->approve($data, false);
-			else
-				throw $e;
-		}
-	}
-	
-	/**
-	 * Approves the payment
-	 * 
-	 * @param jmsPaymentMethodData $data
-	 * @throws jmsPaymentUserActionRequiredException
-	 * @throws jmsPaymentCommunicationException
-	 * @return jmsPaymentMethodData
-	 */
-	private function _approve(jmsPaymentMethodData $data)
-	{
-		$amount = PayPal::getType('BasicAmountType');
-		$amount->setattr('currencyID', $data->getCurrency());
-		$amount->setval(number_format($data->getAmount(), 2));
-		
-		$expressCheckout = PayPal::getType('SetExpressCheckoutRequestDetailsType');
-		$expressCheckout->setNoShipping($data->getValue('no_shipping', 1));
-		$expressCheckout->setCancelURL($data->getValue('cancel_url'));
-		$expressCheckout->setReturnURL($data->getValue('return_url'));
-		$expressCheckout->setPaymentAction('Order');
-		$expressCheckout->setOrderDescription($data->getValue('subject'));
-		$expressCheckout->setOrderTotal($amount);
-		
-		$expressCheckoutRequest = PayPal::getType('SetExpressCheckoutRequestType');
-		$expressCheckoutRequest->setVersion($data->getValue('api_version', '2.0'));
-		$expressCheckoutRequest
-			->setSetExpressCheckoutRequestDetails($ExpressCheckoutType);
-		
-		$request = $this->getCallerServices()
-								->SetExpressCheckout($expressCheckoutRequest);
-								
-		if ($request->Ack !== 'Success')
-			throw new jmsPaymentCommunicationException(
-				'Error when retrieving the express URL: '
-				.is_array($request->Errors)? implode(', ', $request->Errors)
-					: $request->Errors);
-		
-		$host = $this->isDebug() ? 
-							'www.paypal.com' : 'www.sandbox.paypal.com';
-		
+  /**
+   * @var CallerServices
+   */
+  private $_callerServices;
+  
+  /**
+   * We need to make some adjustments to the loading procedure, 
+   * so we can use the PayPal API library
+   */
+  public function __construct()
+  {
+    // unfortunately, the PayPal API was not made for PHP 5
+    // so, we need to disable some error checks
+    error_reporting(E_ERROR | E_WARNING | E_PARSE);
+    
+    // append the PayPal API base dir to the include path
+    ini_set('include_path', ini_get('include_path').PATH_SEPARATOR
+                            .dirname(__FILE__).'/../vendor/PayPal/');
+    
+    require_once 'PayPal.php';
+    require_once 'PayPal/Profile/Handler/Array.php';
+    require_once 'PayPal/Profile/API.php';
+  }
+  
+  /**
+   * Approves the transaction
+   * @see plugins/jmsPaymentPlugin/lib/method/jmsPaymentMethod#approve($data, $retry)
+   */
+  public function approve(jmsPaymentMethodData $data, $retry = false)
+  {
+    try 
+    {
+      $data = $this->_approve($data);
+      return $data;
+    }
+    catch (Exception $e)
+    {
+      if (!$e instanceof jmsPaymentUserActionRequiredException && $retry)
+        return $this->approve($data, false);
+      else
+        throw $e;
+    }
+  }
+  
+  /**
+   * Approves the payment
+   * 
+   * @param jmsPaymentMethodData $data
+   * @throws jmsPaymentUserActionRequiredException
+   * @throws jmsPaymentCommunicationException
+   * @return jmsPaymentMethodData
+   */
+  private function _approve(jmsPaymentMethodData $data)
+  {
+    $amount = PayPal::getType('BasicAmountType');
+    $amount->setattr('currencyID', $data->getCurrency());
+    $amount->setval(number_format($data->getAmount(), 2));
+    
+    $expressCheckout = PayPal::getType('SetExpressCheckoutRequestDetailsType');
+    $expressCheckout->setNoShipping($data->getValue('no_shipping', 1));
+    $expressCheckout->setCancelURL($data->getValue('cancel_url'));
+    $expressCheckout->setReturnURL($data->getValue('return_url'));
+    $expressCheckout->setPaymentAction('Order');
+    $expressCheckout->setOrderDescription($data->getValue('subject'));
+    $expressCheckout->setOrderTotal($amount);
+    
+    $expressCheckoutRequest = PayPal::getType('SetExpressCheckoutRequestType');
+    $expressCheckoutRequest->setVersion($data->getValue('api_version', '2.0'));
+    $expressCheckoutRequest
+      ->setSetExpressCheckoutRequestDetails($ExpressCheckoutType);
+    
+    $request = $this->getCallerServices()
+                ->SetExpressCheckout($expressCheckoutRequest);
+                
+    if ($request->Ack !== 'Success')
+      throw new jmsPaymentCommunicationException(
+        'Error when retrieving the express URL: '
+        .is_array($request->Errors)? implode(', ', $request->Errors)
+          : $request->Errors);
+    
+    $host = $this->isDebug() ? 
+              'www.paypal.com' : 'www.sandbox.paypal.com';
+    
     $data->setProcessedAmount($data->getAmount());
     // TODO: Check if we really need to save this token, and the URL
-		$data->setValue('token', $request->Token);
-		$data->setValue('express_url', sprintf(
+    $data->setValue('token', $request->Token);
+    $data->setValue('express_url', sprintf(
         'https://%s/cgi-bin/webscr?cmd=_express-checkout&token=%s',
         $host, $request->Token
       )
     );
-		
+    
     // throw 
-		$exception = new jmsPaymentUserActionRequiredException(
-		  new jmsPaymentUserActionVisitURL($data->getValue('express_url'))
+    $exception = new jmsPaymentUserActionRequiredException(
+      new jmsPaymentUserActionVisitURL($data->getValue('express_url'))
     );
     $exception->setPaymentMethodData($data);
     throw $exception;
-	}
-	
-	/**
-	 * Deposits a transaction
-	 * @throws jmsPaymentApprovalExpiredException
-	 * @throws jmsPaymentCommunicationException
-	 * @see plugins/jmsPaymentPlugin/lib/method/jmsPaymentMethod#deposit($data, $retry)
-	 */
-	public function deposit(jmsPaymentMethodData $data, $retry = false)
-	{
+  }
+  
+  /**
+   * Deposits a transaction
+   * @throws jmsPaymentApprovalExpiredException
+   * @throws jmsPaymentCommunicationException
+   * @see plugins/jmsPaymentPlugin/lib/method/jmsPaymentMethod#deposit($data, $retry)
+   */
+  public function deposit(jmsPaymentMethodData $data, $retry = false)
+  {
     $amount = PayPal::getType('BasicAmountType');
     $amount->setattr('currencyID', $data->getCurrency());
     $amount->setval(number_format($data->getAmount(), 2)); 
@@ -145,7 +145,7 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
     $result = $this->getCallerServices()->DoCapture($captureRequest);
     
     if ($result->Ack !== 'Success')
-    	throw new jmsPaymentCommunicationException('A communication error occurred.');
+      throw new jmsPaymentCommunicationException('A communication error occurred.');
     
     $response = $result->getDoCaptureResponseDetails();
     $paymentInfo = $response->getPaymentInfo();
@@ -156,110 +156,110 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
     // process the payment status
     switch ($paymentInfo->PaymentStatus)
     {
-    	case 'Expired':
-    	  $e = new jmsPaymentApprovalExpiredException();
-    	  $e->setPaymentData($data);
-    	  throw $e;
-    	
-    	case 'Completed':
-    		return $data;
-    		
-    	default:
-    		// TODO: Some more processing as to what went wrong exactly
-    		$e = new jmsPaymentCommunicationException('A communication error occurred.');
-    		$e->setPaymentData($data);
-    		throw $e; 
+      case 'Expired':
+        $e = new jmsPaymentApprovalExpiredException();
+        $e->setPaymentData($data);
+        throw $e;
+      
+      case 'Completed':
+        return $data;
+        
+      default:
+        // TODO: Some more processing as to what went wrong exactly
+        $e = new jmsPaymentCommunicationException('A communication error occurred.');
+        $e->setPaymentData($data);
+        throw $e; 
     }
-	}
-	
-	/**
-	 * This can be overwritten by sub classes if they want to change the way
-	 * how the username is determined. However, the default should be sufficient
-	 * for most applications.
-	 * 
-	 * @return string
-	 */
-	protected function getUsername()
-	{
-		$config = sfConfig::get('app_jmsPaymentPlugin_paypal');
-		if (!array_key_exists('username', $config))
-			throw new RuntimeException('You must set a PayPal username.');
-			
-		return $config['username'];
-	}
-	
-	/**
-	 * This method can be overwritten by child classes if you want to change the way
-	 * how the signature is determined.
-	 * 
-	 * @return string
-	 */
-	protected function getSignature()
-	{
-		$config = sfConfig::get('app_jmsPaymentPlugin_paypal');
-		if (!array_key_exists('signature', $config))
-			throw new RuntimeException('You must set a PayPal signature.');
-			
-		return $config['signature'];
-	}
-	
-	/**
-	 * This method can be overwritten by child classes if you want to change the way
-	 * how the password is determined.
-	 * 
-	 * @return string
-	 */
-	protected function getPassword()
-	{
-		$config = sfConfig::get('app_jmsPaymentPlugin_paypal');
-		if (!array_key_exists('password', $config))
-			throw new RuntimeException('You must set a PayPal password.');
-			
-		return $config['password'];
-	}
-	
-	/**
-	 * Creates a CallerServices object with our credentials
-	 * 
-	 * @throws RuntimeException if the API Caller could not be initialized
-	 * @return CallerServices
-	 */
-	public function getCallerServices()
-	{
-		if ($this->_callerServices === null)
-		{
-			$username = $this->getUsername();
-			$signature = $this->getSignature();
-			$password = $this->getPassword();
-			$environment = $this->isDebug() ? 'Sandbox' : 'Live';
-			
-			$handler = ProfileHandler_Array::getInstance(array(
-				'username' 					=> $username,
-				'certificateFile'		=> null,
-				'signature'					=> $signature,
-				'subject'						=> null,
-				'environment'				=> $environment,
-			));
-			
-			$profile = APIProfile::getInstance($username, $handler)
-									->setAPIPassword($password);
-									
-			$caller = PayPal::getCallerServices($profile);
-		  
-			// if we are in debug mode, ignore any invalid SSL certificates
-			// TODO: Check if we also need this in production
-			if ($debug)
-		  {
-				$caller->setOpt('curl', CURLOPT_SSL_VERIFYPEER, 0);
-			  $caller->setOpt('curl', CURLOPT_SSL_VERIFYHOST, 0);
-		  }
-		    
-		  if (PayPal::isError($caller))
-		  	throw new RuntimeException('The API Caller could not be initialized.');
-		  	
-		  $this->_callerServices = $caller;
-		}
-		  	
-	  return $this->_callerServices;
-	}
+  }
+  
+  /**
+   * This can be overwritten by sub classes if they want to change the way
+   * how the username is determined. However, the default should be sufficient
+   * for most applications.
+   * 
+   * @return string
+   */
+  protected function getUsername()
+  {
+    $config = sfConfig::get('app_jmsPaymentPlugin_paypal');
+    if (!array_key_exists('username', $config))
+      throw new RuntimeException('You must set a PayPal username.');
+      
+    return $config['username'];
+  }
+  
+  /**
+   * This method can be overwritten by child classes if you want to change the way
+   * how the signature is determined.
+   * 
+   * @return string
+   */
+  protected function getSignature()
+  {
+    $config = sfConfig::get('app_jmsPaymentPlugin_paypal');
+    if (!array_key_exists('signature', $config))
+      throw new RuntimeException('You must set a PayPal signature.');
+      
+    return $config['signature'];
+  }
+  
+  /**
+   * This method can be overwritten by child classes if you want to change the way
+   * how the password is determined.
+   * 
+   * @return string
+   */
+  protected function getPassword()
+  {
+    $config = sfConfig::get('app_jmsPaymentPlugin_paypal');
+    if (!array_key_exists('password', $config))
+      throw new RuntimeException('You must set a PayPal password.');
+      
+    return $config['password'];
+  }
+  
+  /**
+   * Creates a CallerServices object with our credentials
+   * 
+   * @throws RuntimeException if the API Caller could not be initialized
+   * @return CallerServices
+   */
+  public function getCallerServices()
+  {
+    if ($this->_callerServices === null)
+    {
+      $username = $this->getUsername();
+      $signature = $this->getSignature();
+      $password = $this->getPassword();
+      $environment = $this->isDebug() ? 'Sandbox' : 'Live';
+      
+      $handler = ProfileHandler_Array::getInstance(array(
+        'username'           => $username,
+        'certificateFile'    => null,
+        'signature'          => $signature,
+        'subject'            => null,
+        'environment'        => $environment,
+      ));
+      
+      $profile = APIProfile::getInstance($username, $handler)
+                  ->setAPIPassword($password);
+                  
+      $caller = PayPal::getCallerServices($profile);
+      
+      // if we are in debug mode, ignore any invalid SSL certificates
+      // TODO: Check if we also need this in production
+      if ($debug)
+      {
+        $caller->setOpt('curl', CURLOPT_SSL_VERIFYPEER, 0);
+        $caller->setOpt('curl', CURLOPT_SSL_VERIFYHOST, 0);
+      }
+        
+      if (PayPal::isError($caller))
+        throw new RuntimeException('The API Caller could not be initialized.');
+        
+      $this->_callerServices = $caller;
+    }
+        
+    return $this->_callerServices;
+  }
 }

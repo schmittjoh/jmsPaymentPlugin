@@ -22,25 +22,25 @@
  */
 class jmsPaymentUserAction
 {
-	/**
-	 * A string that uniquely identifies the type of action
-	 * @var string
-	 */
-	private $_type;
-	
-	/**
-	 * @param string $type
-	 */
-	public function __construct($type)
-	{
-		$this->_type = $type;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public final function getType()
-	{
-		return $this->_type;
-	}
+  /**
+   * A string that uniquely identifies the type of action
+   * @var string
+   */
+  private $_type;
+  
+  /**
+   * @param string $type
+   */
+  public function __construct($type)
+  {
+    $this->_type = $type;
+  }
+  
+  /**
+   * @return string
+   */
+  public final function getType()
+  {
+    return $this->_type;
+  }
 }

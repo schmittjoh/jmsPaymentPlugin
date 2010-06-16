@@ -24,29 +24,29 @@
  */
 class jmsPaymentUserActionVisitURL extends jmsPaymentUserAction
 {
-	const TYPE = 'visit_url';
-	
-	/**
-	 * A URL that the user needs to visit to complete the transaction
-	 * @var string
-	 */
-	private $_url;
-	
-	/**
-	 * @param string $url
-	 */
-	public function __construct($url)
-	{
-		parent::__construct(self::TYPE);
-		
-		$this->_url = $url;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public final function getURL()
-	{
-		return $this->_url;
-	}
+  const TYPE = 'visit_url';
+  
+  /**
+   * A URL that the user needs to visit to complete the transaction
+   * @var string
+   */
+  private $_url;
+  
+  /**
+   * @param string $url
+   */
+  public function __construct($url)
+  {
+    parent::__construct(self::TYPE);
+    
+    $this->_url = $url;
+  }
+  
+  /**
+   * @return string
+   */
+  public final function getURL()
+  {
+    return $this->_url;
+  }
 }

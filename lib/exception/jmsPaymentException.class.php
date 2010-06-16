@@ -24,27 +24,27 @@
  */
 class jmsPaymentException extends Exception
 {
-	/**
-	 * An array with updated payment data which is supposed to be persisted
-	 * even though the transaction method (approve, deposit, etc.) has not
-	 * completed normally.
-	 * 
-	 * @var jmsPaymentMethodData
-	 */
-	private $_paymentMethodData;
-	
-	public final function setPaymentMethodData(jmsPaymentMethodData $data)
-	{
-		$this->_paymentMethodData = $data;
-	}
-	
-	public final function hasPaymentMethodData()
-	{
-		return $this->_paymentMethodData !== null;
-	}
-	
-	public final function getPaymentMethodData()
-	{
-		return $this->_paymentMethodData;
-	}
+  /**
+   * An array with updated payment data which is supposed to be persisted
+   * even though the transaction method (approve, deposit, etc.) has not
+   * completed normally.
+   * 
+   * @var jmsPaymentMethodData
+   */
+  private $_paymentMethodData;
+  
+  public final function setPaymentMethodData(jmsPaymentMethodData $data)
+  {
+    $this->_paymentMethodData = $data;
+  }
+  
+  public final function hasPaymentMethodData()
+  {
+    return $this->_paymentMethodData !== null;
+  }
+  
+  public final function getPaymentMethodData()
+  {
+    return $this->_paymentMethodData;
+  }
 }

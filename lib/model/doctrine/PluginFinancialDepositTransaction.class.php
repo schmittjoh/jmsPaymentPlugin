@@ -30,56 +30,56 @@ abstract class PluginFinancialDepositTransaction extends BaseFinancialDepositTra
 {
   protected final function doExecute()
   {
-  	$data = $this->getPaymentMethodData();
-  	$method = $this->getPaymentMethodInstance();
-  	$payment = $this->Payment;
-  	$currencyTable = Doctrine_Core::getTable('Currency');
-  	
-  	$payment->state = Payment::STATE_DEPOSITING;
-  	$depositingAmount = $currencyTable->convertAmount(
-  	  $data->getAmount(), $data->getCurrency(), $payment->currency
-  	);
-  	
-  	if ($this->isFirstExecution())
-  	  $payment->depositing_amount += $depositingAmount;
-  	
-  	try 
-  	{
-  	  $method->deposit($data);
-  	  
-  	  $payment->depositing_amount -= $depositingAmount;
-  	  
-  	  $depositedAmount = $currencyTable->convertAmount(
-  	    $data->getProcessedAmount(), $data->getCurrency(), $payment->currency
-  	  );
-  	  $payment->deposited_amount += $depositedAmount;
-  	  
-  	  if ($payment->deposited_amount >= $payment->target_amount)
-  	    $payment->state = Payment::STATE_COMPLETE;
-  	  
-  	  return $data;
-  	}
-  	catch (jmsPaymentException $e)
-  	{
-  		if (!$e instanceof jmsPaymentUserActionRequiredException)
-  		  $payment->depositing_amount -= $depositingAmount;
-  		  
-  		if ($e instanceof jmsPaymentApprovalExpiredException)
-  		  $payment->state = Payment::STATE_EXPIRED;
-  		  
-  		throw $e;
-  	}
+    $data = $this->getPaymentMethodData();
+    $method = $this->getPaymentMethodInstance();
+    $payment = $this->Payment;
+    $currencyTable = Doctrine_Core::getTable('Currency');
+    
+    $payment->state = Payment::STATE_DEPOSITING;
+    $depositingAmount = $currencyTable->convertAmount(
+      $data->getAmount(), $data->getCurrency(), $payment->currency
+    );
+    
+    if ($this->isFirstExecution())
+      $payment->depositing_amount += $depositingAmount;
+    
+    try 
+    {
+      $method->deposit($data);
+      
+      $payment->depositing_amount -= $depositingAmount;
+      
+      $depositedAmount = $currencyTable->convertAmount(
+        $data->getProcessedAmount(), $data->getCurrency(), $payment->currency
+      );
+      $payment->deposited_amount += $depositedAmount;
+      
+      if ($payment->deposited_amount >= $payment->target_amount)
+        $payment->state = Payment::STATE_COMPLETE;
+      
+      return $data;
+    }
+    catch (jmsPaymentException $e)
+    {
+      if (!$e instanceof jmsPaymentUserActionRequiredException)
+        $payment->depositing_amount -= $depositingAmount;
+        
+      if ($e instanceof jmsPaymentApprovalExpiredException)
+        $payment->state = Payment::STATE_EXPIRED;
+        
+      throw $e;
+    }
   }
   
   public final function setRequestedAmount($amount)
   {
-  	$max = $this->requested_amount 
-  	       + Doctrine_Core::getTable('Currency')->convertAmount(
+    $max = $this->requested_amount 
+           + Doctrine_Core::getTable('Currency')->convertAmount(
                $this->Payment->getPendingAmount(), 
                $this->Payment->currency, 
                $this->currency
              );
-  	
+    
     if ($amount > $max)
       throw new InvalidArgumentException(
         '$amount cannot be greater than '.$max.', given: '.$amount.'.');
@@ -89,12 +89,12 @@ abstract class PluginFinancialDepositTransaction extends BaseFinancialDepositTra
   
   protected final function canBePerformedOn(Payment $payment)
   {
-  	return $payment->state === Payment::STATE_APPROVED
-  	       ||
-  	       (
-  	         $payment->state === Payment::STATE_DEPOSITING
-  	         && $payment->deposited_amount < $payment->target_amount
-  	       )
-  	;
+    return $payment->state === Payment::STATE_APPROVED
+           ||
+           (
+             $payment->state === Payment::STATE_DEPOSITING
+             && $payment->deposited_amount < $payment->target_amount
+           )
+    ;
   }
 }

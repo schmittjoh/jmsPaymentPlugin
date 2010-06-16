@@ -17,7 +17,7 @@
 
 interface jmsPaymentMethodInterface
 {
-	/**
+  /**
    * Verifies that the customer is allowed to make the purchase. The approve 
    * action helps to ensure that a customer has adequate funds available to make 
    * the purchase. Depending on the payment type and business policy, varying 
@@ -31,16 +31,16 @@ interface jmsPaymentMethodInterface
    * apply to all payment methods. For instance, it would not make sense for an 
    * approve action to occur for electronic check (ACH) transactions. 
    *  
-	 * @param jmsPaymentMethodData $data
-	 * @param boolean $retry
+   * @param jmsPaymentMethodData $data
+   * @param boolean $retry
    * @throws jmsPaymentUserActionRequiredException if an action of the user is required
    * @throws jmsPaymentCommunicationException if there occurred an error during the operation.
    * @throws jmsPaymentFunctionNotSupportedException if this operation is not supported by this method.
    * @throws jmsPaymentTimeoutException if the operation experienced a time out during its operation.
    * @return void
-	 */
-	public function approve(jmsPaymentMethodData $data, $retry = false);
-	
+   */
+  public function approve(jmsPaymentMethodData $data, $retry = false);
+  
   /**
    * Captures a payment for an order. In general, communication with a payment 
    * back-end system or payment processor occurs at this stage.
@@ -54,8 +54,8 @@ interface jmsPaymentMethodInterface
    * @throws jmsPaymentTimeoutException if the operation experienced a time out during its operation.
    * @return void
    */
-	public function deposit(jmsPaymentMethodData $data, $retry = false);
-	
+  public function deposit(jmsPaymentMethodData $data, $retry = false);
+  
   /**
    * Voids an approval. Only full reversals are supported; reversal of partial 
    * amounts is not supported. 
@@ -68,8 +68,8 @@ interface jmsPaymentMethodInterface
    * @throws jmsPaymentTimeoutException if the operation experienced a time out during its operation.
    * @return void
    */
-	public function reverseApproval(jmsPaymentMethodData $data, $retry = false);
-	
+  public function reverseApproval(jmsPaymentMethodData $data, $retry = false);
+  
   /**
    * Voids a deposit. Only full reversals are supported; reversal of partial
    * amounts is not supported.
@@ -82,5 +82,5 @@ interface jmsPaymentMethodInterface
    * @throws jmsPaymentTimeoutException if the operation experienced a time out during its operation.
    * @return void
    */
-	public function reverseDeposit(jmsPaymentMethodData $data, $retry = false);
+  public function reverseDeposit(jmsPaymentMethodData $data, $retry = false);
 }

@@ -37,28 +37,28 @@ interface jmsPaymentRuleInterface
   const COMMAND_DNE = 'dne';
   const COMMAND_APPROVED = 'approved';
   const COMMAND_DEPOSITED = 'deposited';
-  	
-	/**
-	 * The order capture life cycle phase corresponds to the PrimePayment 
-	 * payment event.
-	 * 
-	 * @return string
-	 */
-	public function getPrimeCommand();
-	
-	/**
-	 * The release to fulfillment life cycle phase corresponds to the 
-	 * ReservePayment payment event.
-	 * 
-	 * @return string
-	 */
-	public function getReserveCommand();
-	
-	/**
-	 * The fulfillment (shipment confirmation) life cycle phase corresponds to a 
-	 * FinalizePayment payment event.
-	 * 
-	 * @return string
-	 */
-	public function getFinalizeCommand();
+    
+  /**
+   * The order capture life cycle phase corresponds to the PrimePayment 
+   * payment event.
+   * 
+   * @return string
+   */
+  public function getPrimeCommand();
+  
+  /**
+   * The release to fulfillment life cycle phase corresponds to the 
+   * ReservePayment payment event.
+   * 
+   * @return string
+   */
+  public function getReserveCommand();
+  
+  /**
+   * The fulfillment (shipment confirmation) life cycle phase corresponds to a 
+   * FinalizePayment payment event.
+   * 
+   * @return string
+   */
+  public function getFinalizeCommand();
 }

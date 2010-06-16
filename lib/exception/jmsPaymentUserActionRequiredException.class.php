@@ -23,17 +23,17 @@
  */
 class jmsPaymentUserActionRequiredException extends jmsPaymentException
 {
-	private $_action;
-	
-	public function __construct(jmsPaymentUserAction $action, $message = '', 
-	                            $code = 0, Exception $previous = null)
-	{
-		parent::__construct($message, $code, $previous);
-		$this->_action = $action;
-	}
-	
-	public final function getAction()
-	{
-		return $this->_action;
-	}
+  private $_action;
+  
+  public function __construct(jmsPaymentUserAction $action, $message = '', 
+                              $code = 0, Exception $previous = null)
+  {
+    parent::__construct($message, $code, $previous);
+    $this->_action = $action;
+  }
+  
+  public final function getAction()
+  {
+    return $this->_action;
+  }
 }

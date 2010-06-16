@@ -21,5 +21,5 @@
  */
 class jmsPaymentApprovalExpiredException extends jmsPaymentException
 {
-	
+  
 }

@@ -17,17 +17,17 @@
 
 class jmsPaymentTransactionEvent extends jmsPaymentEvent
 {
-	private $_transaction;
-	
-	public function __construct($name, Payment $payment, FinancialTransaction $transaction)
-	{
-		parent::__construct($name, $payment);
-		
-		$this->_transaction = $transaction;
-	}
-	
-	public final function getTransaction()
-	{
-		return $this->_transaction;
-	}
+  private $_transaction;
+  
+  public function __construct($name, Payment $payment, FinancialTransaction $transaction)
+  {
+    parent::__construct($name, $payment);
+    
+    $this->_transaction = $transaction;
+  }
+  
+  public final function getTransaction()
+  {
+    return $this->_transaction;
+  }
 }

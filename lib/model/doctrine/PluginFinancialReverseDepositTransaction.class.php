@@ -30,23 +30,23 @@ abstract class PluginFinancialReverseDepositTransaction extends BaseFinancialRev
 {
   protected final function doExecute()
   {
-  	$data = $this->getPaymentMethodData();
-  	$method = $this->getPaymentMethodInstance();
-  	
-  	$method->reverseDeposit($data);
-  	
-  	$this->Payment->deposited_amount -= $data->getProcessedAmount();
-  	$this->Payment->state = Payment::STATE_CANCELED;
-  	
-  	return $data;
+    $data = $this->getPaymentMethodData();
+    $method = $this->getPaymentMethodInstance();
+    
+    $method->reverseDeposit($data);
+    
+    $this->Payment->deposited_amount -= $data->getProcessedAmount();
+    $this->Payment->state = Payment::STATE_CANCELED;
+    
+    return $data;
   }
   
   public final function setRequestedAmount($amount)
   {
-  	$max = Doctrine_Core::getTable('Currency')->convertAmount(
-  	  $this->Payment->deposited_amount, $this->Payment->currency, $this->currency
-  	);
-  	
+    $max = Doctrine_Core::getTable('Currency')->convertAmount(
+      $this->Payment->deposited_amount, $this->Payment->currency, $this->currency
+    );
+    
     if (floatval($amount) !== $max)
       throw new InvalidArgumentException(
         '$amount must be equal to '.$max.', given: '.$amount.'.');
@@ -56,15 +56,15 @@ abstract class PluginFinancialReverseDepositTransaction extends BaseFinancialRev
   
   protected final function canBePerformedOn(Payment $payment)
   {
-  	return $payment->state === Payment::STATE_COMPLETE
-  	       ||
-  	       (
-  	         $payment->state === Payment::STATE_DEPOSITING
-  	         && $payment->getFilteredTransactions(
-  	           FinancialTransaction::STATE_PENDING,
-  	           FinancialTransaction::TYPE_DEPOSIT
-  	         )->count() === 0
-  	       )
-  	;
+    return $payment->state === Payment::STATE_COMPLETE
+           ||
+           (
+             $payment->state === Payment::STATE_DEPOSITING
+             && $payment->getFilteredTransactions(
+               FinancialTransaction::STATE_PENDING,
+               FinancialTransaction::TYPE_DEPOSIT
+             )->count() === 0
+           )
+    ;
   }
 }
