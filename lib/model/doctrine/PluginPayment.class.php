@@ -65,7 +65,6 @@ abstract class PluginPayment extends BasePayment
     ),
     self::STATE_APPROVED => array(
       self::STATE_CANCELED,
-      self::STATE_EXPIRED,
       self::STATE_DEPOSITING,
     ),
     self::STATE_CANCELED => array(),
