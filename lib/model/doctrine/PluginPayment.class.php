@@ -24,7 +24,6 @@
  * @subpackage payment
  * @author     Johannes M. Schmitt <schmittjoh@gmail.com>
  * @version    SVN: $Id: Builder.php 7490 2010-03-29 19:53:27Z jwage $
- * TODO: Determine which events need to be dispatched to listeners
  */
 abstract class PluginPayment extends BasePayment
 {
@@ -39,6 +38,7 @@ abstract class PluginPayment extends BasePayment
   
   const EVENT_PRE_TRANSACTION = 'pre_transaction';
   const EVENT_POST_TRANSACTION = 'post_transaction';
+  const EVENT_POST_STATE_CHANGE = 'post_state_change';
   
   /**
    * This variable is used to ensure that developers use the static 
@@ -193,6 +193,8 @@ abstract class PluginPayment extends BasePayment
       );
       
     $this->_set('state', $state);
+    
+    $this->dispatchEvent(self::EVENT_POST_STATE_CHANGE);
   }
   
   /**
@@ -299,11 +301,9 @@ abstract class PluginPayment extends BasePayment
    * 
    * Approval Phase:
    * open_amount = target_amount - (approved_amount + approving_amount)
-   *               - amount_of_new_transactions
    * 
    * Deposit Phase:
    * open_amount = target_amount - (deposited_amount + depositing_amount)
-   *               - amount_of_new_transactions
    * 
    * @return float
    */
@@ -312,35 +312,16 @@ abstract class PluginPayment extends BasePayment
     if ($this->isInApprovalPhase())
       return $this->target_amount 
               - $this->approved_amount 
-              - $this->approving_amount
-              - $this->getNewTransactionsAmount();
+              - $this->approving_amount;
               
     else if ($this->isInDepositPhase())
       return $this->target_amount
              - $this->depositing_amount
-             - $this->deposited_amount
-             - $this->getNewTransactionsAmount();
+             - $this->deposited_amount;
     
     // this means final state, or COMPLETE
     else
       return 0.0;
-  }
-  
-  /**
-   * Returns the amount of all NEW transactions. This is used internally, if 
-   * you need this amount, you can iterate over the transactions yourself.
-   * 
-   * @return float
-   */
-  private function getNewTransactionsAmount()
-  {
-    $amount = 0.0;
-    
-    foreach ($this->getFilteredTransactions(FinancialTransaction::STATE_NEW) 
-             as $transaction)
-      $amount += $transaction->requested_amount;
-    
-    return $amount;
   }
   
   /**
@@ -420,11 +401,22 @@ abstract class PluginPayment extends BasePayment
   
   /**
    * This is called after a transaction has been made. The transactions
-   * state will already be persisted. You can overwrite
+   * state will already be persisted. This is designed to be overridden by
+   * sub classes.
    * 
    * @param jmsPaymentTransactionEvent $event
    */
   protected function postTransactionEvent(jmsPaymentTransactionEvent $event) 
+  {
+  }
+  
+  /**
+   * This is called after the state of the payment has changed. You can
+   * override this method in sub classes.
+   * 
+   * @param jmsPaymentEvent $event
+   */
+  protected function postStateChangeEvent(jmsPaymentEvent $event)
   {
   }
   
@@ -484,6 +476,10 @@ abstract class PluginPayment extends BasePayment
         
       case self::EVENT_POST_TRANSACTION:
         $this->postTransactionEvent($event);
+        break;
+        
+      case self::EVENT_POST_STATE_CHANGE:
+        $this->postStateChangeEvent($event);
         break;
     }
     
