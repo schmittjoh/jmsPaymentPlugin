@@ -421,16 +421,6 @@ abstract class PluginPayment extends BasePayment
   }
   
   /**
-   * This is called after the state of the payment has changed. You can
-   * override this method in sub classes.
-   * 
-   * @param jmsPaymentEvent $event
-   */
-  protected function postStateChangeEvent(jmsPaymentEvent $event)
-  {
-  }
-  
-  /**
    * A shortcut for performTransaction('approve')
    */
   public final function approve()
