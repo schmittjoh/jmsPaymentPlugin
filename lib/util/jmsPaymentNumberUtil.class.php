@@ -25,7 +25,7 @@
 class jmsPaymentNumberUtil
 {
   const EPSILON = 1.0E-8;
-	
+  
   /**
    * Compares two floating point number, and accommodates for precision
    * errors which can occur when floating numbers are converted to binary
@@ -37,11 +37,11 @@ class jmsPaymentNumberUtil
    * @return integer Returns 1, -1 or 0 when $float1 > $float2, $float1 < $float2
    *                 or $float1 == $float2 respectively
    */
-	public final static function compareFloats($float1, $float2)
-	{
-		if (abs($float1 - $float2) < self::EPSILON)
-		  return 0;
-		  
-		return $float1 > $float2 ? 1 : -1;
-	}
+  public final static function compareFloats($float1, $float2)
+  {
+    if (abs($float1 - $float2) < self::EPSILON)
+      return 0;
+      
+    return $float1 > $float2 ? 1 : -1;
+  }
 }
