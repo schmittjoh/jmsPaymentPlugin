@@ -25,7 +25,7 @@
  */
 class jmsPaymentPluginConfiguration extends sfPluginConfiguration
 {
-  const VERSION = '1.0.1-DEV';
+  const VERSION = '1.0.2-DEV';
 
   /**
    * @see sfPluginConfiguration

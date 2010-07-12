@@ -47,7 +47,7 @@ abstract class PluginFinancialReverseDepositTransaction extends BaseFinancialRev
       $this->Payment->deposited_amount, $this->Payment->currency, $this->currency
     );
     
-    if (floatval($amount) !== $max)
+    if (jmsPaymentNumberUtil::compareFloats($amount, $max) !== 0)
       throw new InvalidArgumentException(
         '$amount must be equal to '.$max.', given: '.$amount.'.');
 

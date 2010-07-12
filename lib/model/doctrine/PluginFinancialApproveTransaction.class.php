@@ -56,7 +56,8 @@ abstract class PluginFinancialApproveTransaction extends BaseFinancialApproveTra
       
       // set the payment to APPROVED if the approved amount is greater or equal
       // to the target amount of the payment
-      if ($payment->approved_amount >= $payment->target_amount)
+      if (jmsPaymentNumberUtil::compareFloats(
+            $payment->approved_amount, $payment->target_amount) >= 0)
         $payment->state = Payment::STATE_APPROVED;
       
       return $data;
@@ -72,7 +73,8 @@ abstract class PluginFinancialApproveTransaction extends BaseFinancialApproveTra
       {
         $payment->approved_amount += $approvingAmount;
         
-        if ($payment->approved_amount >= $payment->target_amount)
+        if (jmsPaymentNumberUtil::compareFloats(
+              $payment->approved_amount, $payment->target_amount) >= 0)
           $payment->state = Payment::STATE_APPROVED;
         
         return $data;
@@ -85,11 +87,11 @@ abstract class PluginFinancialApproveTransaction extends BaseFinancialApproveTra
   
   public final function setRequestedAmount($amount)
   {
-    if ($amount > $max = $this->requested_amount + 
-          Doctrine_Core::getTable('Currency')->convertAmount(
-            $this->Payment->getPendingAmount(), $this->Payment->currency, $this->currency
-          ) 
-    )
+  	$max = $this->requested_amount + 
+           Doctrine_Core::getTable('Currency')->convertAmount(
+             $this->Payment->getPendingAmount(), $this->Payment->currency, $this->currency
+           );
+    if (jmsPaymentNumberUtil::compareFloats($amount, $max) > 0) 
       throw new InvalidArgumentException(
         '$amount cannot be greater than '.$max.', given: '.$amount.'.');
 
@@ -102,7 +104,8 @@ abstract class PluginFinancialApproveTransaction extends BaseFinancialApproveTra
            || 
            (
              $payment->state === Payment::STATE_APPROVING 
-             && $payment->approved_amount < $payment->target_amount
+             && jmsPaymentNumberUtil::compareFloats(
+                  $payment->approved_amount, $payment->target_amount) < 0
            )
     ;
   }

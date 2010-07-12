@@ -54,7 +54,8 @@ abstract class PluginFinancialDepositTransaction extends BaseFinancialDepositTra
       );
       $payment->deposited_amount += $depositedAmount;
       
-      if ($payment->deposited_amount >= $payment->target_amount)
+      if (jmsPaymentNumberUtil::compareFloats(
+            $payment->deposited_amount, $payment->target_amount) >= 0)
         $payment->state = Payment::STATE_COMPLETE;
       
       return $data;
@@ -80,7 +81,7 @@ abstract class PluginFinancialDepositTransaction extends BaseFinancialDepositTra
                $this->currency
              );
     
-    if ($amount > $max)
+    if (jmsPaymentNumberUtil::compareFloats($amount, $max) > 0)
       throw new InvalidArgumentException(
         '$amount cannot be greater than '.$max.', given: '.$amount.'.');
       
@@ -93,7 +94,8 @@ abstract class PluginFinancialDepositTransaction extends BaseFinancialDepositTra
            ||
            (
              $payment->state === Payment::STATE_DEPOSITING
-             && $payment->deposited_amount < $payment->target_amount
+             && jmsPaymentNumberUtil::compareFloats(
+                  $payment->deposited_amount, $payment->target_amount) < 0
            )
     ;
   }
