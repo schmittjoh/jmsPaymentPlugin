@@ -87,8 +87,7 @@ abstract class PluginFinancialApproveTransaction extends BaseFinancialApproveTra
   
   public final function setRequestedAmount($amount)
   {
-  	$max = $this->requested_amount + 
-           Doctrine_Core::getTable('Currency')->convertAmount(
+  	$max = Doctrine_Core::getTable('Currency')->convertAmount(
              $this->Payment->getPendingAmount(), $this->Payment->currency, $this->currency
            );
     if (jmsPaymentNumberUtil::compareFloats($amount, $max) > 0) 

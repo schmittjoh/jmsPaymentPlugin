@@ -215,8 +215,7 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
       throw new RuntimeException(
         'The requested amount cannot be changed on not NEW transactions.');
 
-    $amount = floatval($amount);
-    if ($amount <= 0.0)
+    if (jmsPaymentNumberUtil::compareFloats($amount, 0.0) <= 0)
       throw new InvalidArgumentException('$amount cannot be smaller or equal to 0.');
 
     $this->_set('requested_amount', $amount);
