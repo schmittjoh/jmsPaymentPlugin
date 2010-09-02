@@ -1,0 +1,40 @@
+options:
+  type:         InnoDB
+  charset:      utf8
+  collate:      utf8_unicode_ci
+
+MicropaymentDebitPaymentData:
+  inheritance:
+    extends: PaymentData
+    type: column_aggregation
+    keyField: method_class_name
+    keyValue: jmsMicropaymentDebitPaymentMethod
+  columns:
+    bank_country:
+      type: string(2)
+      notnull: true
+    bank_code:
+      type: string(255)
+      notnull: true
+    account_holder: 
+      type: string(255)
+      notnull: true
+    account_number:
+      type: string(255)
+      notnull: true
+    project: 
+      type: string(255)
+      notnull: false
+      default: null
+    project_campaign:
+      type: string(255)
+      notnull: false
+      default: null
+    payment_text:
+      type: string(255)
+      notnull: false
+      default: null
+    ip:
+      type: string(15)
+      notnull: false
+      default: null
