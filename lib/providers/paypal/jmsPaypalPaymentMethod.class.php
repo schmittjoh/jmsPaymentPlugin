@@ -235,7 +235,7 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
         'Error while capturing payment: '.$result->getMessage());
     
     if ($result->Ack !== 'Success')
-      throw new jmsPaymentCommunicationException('A communication error occurred.');
+      throw new jmsPaymentCommunicationException('Error '.$result->Ack.' while capturing.');
     
     $response = $result->getDoCaptureResponseDetails();
     $paymentInfo = $response->getPaymentInfo();
@@ -248,16 +248,22 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
     {
       case 'Expired':
         $e = new jmsPaymentApprovalExpiredException();
-        $e->setPaymentData($data);
+        $e->setPaymentMethodData($data);
         throw $e;
       
       case 'Completed':
         return $data;
         
+      case 'Pending':
+      	$e = new jmsPaymentException('Payment is still pending; reason: '.$paymentInfo->PendingReason);
+      	$data->setResponseCode('Pending: '.$paymentInfo->PendingReason);
+      	$e->setPaymentMethodData($data);
+      	throw $e;
+        
       default:
         // TODO: Some more processing as to what went wrong exactly
-        $e = new jmsPaymentCommunicationException('A communication error occurred.');
-        $e->setPaymentData($data);
+        $e = new jmsPaymentException('Payment could not be completed. Status: '.$paymentInfo->PaymentStatus);
+        $e->setPaymentMethodData($data);
         throw $e; 
     }
   }
