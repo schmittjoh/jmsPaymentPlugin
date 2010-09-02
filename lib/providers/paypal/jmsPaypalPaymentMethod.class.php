@@ -23,6 +23,8 @@
  */
 class jmsPaypalPaymentMethod extends jmsPaymentMethod
 {
+	const API_VERSION = '2.0';
+	
   /**
    * @var CallerServices
    */
@@ -40,7 +42,7 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
     
     // append the PayPal API base dir to the include path
     ini_set('include_path', ini_get('include_path').PATH_SEPARATOR
-                            .dirname(__FILE__).'/../vendor/PayPal/');
+                            .sfConfig::get('sf_lib_dir').'/vendor/PayPal/');
     
     require_once 'PayPal.php';
     require_once 'PayPal/Profile/Handler/Array.php';
@@ -77,6 +79,83 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
    */
   private function _approve(jmsPaymentMethodData $data)
   {
+  	if ($data->getValue('express_token') === null)
+  	  $this->generateExpressUrl($data);
+  	else
+  	  $this->verifyApproval($data);
+  }
+  
+  /**
+   * Contact the PayPal servers in order to verify the payment
+   * @param jmsPaymentMethodData $data
+   */
+  private function verifyApproval(jmsPaymentMethodData $data)
+  {
+  	$expressCheckoutDetailsRequest = PayPal::getType('GetExpressCheckoutDetailsRequestType');
+    $expressCheckoutDetailsRequest->setToken($data->getValue('express_token'));
+
+    $response = $this->getCallerServices()->GetExpressCheckoutDetails($expressCheckoutDetailsRequest);
+    
+    if (Pear::isError($response))
+      throw new jmsPaymentCommunicationException(
+        'Error while fetching express checkout details: '.$response->getMessage());
+      
+    if ($response->Ack !== 'Success')
+      throw new jmsPaymentCommunicationException(
+        'Express checkout details could not be retrieved: '.$response->Ack);
+    
+    $details = $response->getGetExpressCheckoutDetailsResponseDetails();
+    $buyerInfo = $details->getPayerInfo();
+    
+    if ($this->verifiedAccountRequired() && $buyerInfo->PayerStatus !== 'verified')
+      throw new jmsPaymentUnverifiedBuyerException('This PayPal account is not verified.');
+    
+    $data->setValue('payer_id', $buyerInfo->PayerID);
+    
+    $basicAmount = PayPal::getType('BasicAmountType');
+    $basicAmount->setattr('currencyID', $data->getCurrency());
+    $basicAmount->setval(number_format($data->getAmount(), 2));
+      
+    $paymentDetails = PayPal::getType('PaymentDetailsType');
+    $paymentDetails->setOrderTotal($basicAmount);
+    $paymentDetails->setOrderDescription($data->subject);
+
+    $request = PayPal::getType('DoExpressCheckoutPaymentRequestDetailsType');
+    $request->setToken($data->getValue('express_token'));
+    $request->setPayerID($buyerInfo->PayerID);
+    $request->setPaymentAction('Order');
+    $request->setPaymentDetails($paymentDetails);
+            
+    $doExpressCheckoutPaymentRequest = PayPal::getType('DoExpressCheckoutPaymentRequestType');
+    $doExpressCheckoutPaymentRequest->setVersion(self::API_VERSION);
+    $doExpressCheckoutPaymentRequest->setDoExpressCheckoutPaymentRequestDetails($request);
+        
+    $response = $this->getCallerServices()
+                 ->DoExpressCheckoutPayment($doExpressCheckoutPaymentRequest);
+
+    if (Pear::isError($response))
+      throw new jmsPaymentCommunicationException(
+        'Error while authorizing express checkout payment: '.$response->getMessage());
+      
+    if ($response->Ack !== 'Success')
+      throw new jmsPaymentCommunicationException(
+          'Payment could not be authorized: '.$response->Ack);
+                   
+    $details = $response->getDoExpressCheckoutPaymentResponseDetails();
+    $paymentInfo = $details->getPaymentInfo();
+    $data->setValue('external_reference_number', $paymentInfo->TransactionID);
+    $data->setProcessedAmount($data->getAmount());
+  }
+  
+  /**
+   * Generates the Express URL which is given to the user in order to approve
+   * the payment
+   * 
+   * @param $data
+   * @throws jmsPaymentUserActionRequiredException this is always thrown
+   */
+  private function generateExpressUrl(jmsPaymentMethodData $data)
+  {
     $amount = PayPal::getType('BasicAmountType');
     $amount->setattr('currencyID', $data->getCurrency());
     $amount->setval(number_format($data->getAmount(), 2));
@@ -90,25 +169,32 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
     $expressCheckout->setOrderTotal($amount);
     
     $expressCheckoutRequest = PayPal::getType('SetExpressCheckoutRequestType');
-    $expressCheckoutRequest->setVersion($data->getValue('api_version', '2.0'));
+    $expressCheckoutRequest->setVersion(self::API_VERSION);
     $expressCheckoutRequest
-      ->setSetExpressCheckoutRequestDetails($ExpressCheckoutType);
+      ->setSetExpressCheckoutRequestDetails($expressCheckout);
     
     $request = $this->getCallerServices()
                 ->SetExpressCheckout($expressCheckoutRequest);
-                
+
+    if (Pear::isError($request))
+      throw new jmsPaymentCommunicationException(
+        'Error when retrieving the express URL: '.$request->getMessage()
+      );
+    
     if ($request->Ack !== 'Success')
       throw new jmsPaymentCommunicationException(
-        'Error when retrieving the express URL: '
-        .is_array($request->Errors)? implode(', ', $request->Errors)
-          : $request->Errors);
+        'Error ('.$request->Ack.') when retrieving the express URL: '
+        .(
+           is_array($request->Errors) ? 
+           implode(', ', $request->Errors) : var_export($request->Errors, true)
+        )
+      );
     
-    $host = $this->isDebug() ? 
+    $host = !$this->isDebug() ? 
               'www.paypal.com' : 'www.sandbox.paypal.com';
-    
+
     $data->setProcessedAmount($data->getAmount());
-    // TODO: Check if we really need to save this token, and the URL
-    $data->setValue('token', $request->Token);
+    $data->setValue('express_token', $request->Token);
     $data->setValue('express_url', sprintf(
         'https://%s/cgi-bin/webscr?cmd=_express-checkout&token=%s',
         $host, $request->Token
@@ -143,6 +229,10 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
       $captureRequest->setNote($data->getValue('note'));
       
     $result = $this->getCallerServices()->DoCapture($captureRequest);
+    
+    if (Pear::isError($result))
+      throw new jmsPaymentCommunicationException(
+        'Error while capturing payment: '.$result->getMessage());
     
     if ($result->Ack !== 'Success')
       throw new jmsPaymentCommunicationException('A communication error occurred.');
@@ -219,6 +309,18 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
   }
   
   /**
+   * Whether people need a verified PayPal account for payments
+   * @return boolean
+   */
+  protected function verifiedAccountRequired()
+  {
+  	$config = sfConfig::get('app_jmsPaymentPlugin_paypal');
+  	
+  	return isset($config['verified_account_required'])
+  	       && $config['verified_account_required'] === true;
+  }
+  
+  /**
    * Creates a CallerServices object with our credentials
    * 
    * @throws RuntimeException if the API Caller could not be initialized
@@ -241,21 +343,22 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
         'environment'        => $environment,
       ));
       
-      $profile = APIProfile::getInstance($username, $handler)
-                  ->setAPIPassword($password);
+      $profile = APIProfile::getInstance($username, $handler);
+      $profile->setAPIPassword($password);
                   
       $caller = PayPal::getCallerServices($profile);
       
       // if we are in debug mode, ignore any invalid SSL certificates
       // TODO: Check if we also need this in production
-      if ($debug)
+      if ($this->isDebug())
       {
         $caller->setOpt('curl', CURLOPT_SSL_VERIFYPEER, 0);
         $caller->setOpt('curl', CURLOPT_SSL_VERIFYHOST, 0);
       }
         
       if (PayPal::isError($caller))
-        throw new RuntimeException('The API Caller could not be initialized.');
+        throw new RuntimeException('The API Caller could not be initialized: '
+                                   .$caller->getMessage());
         
       $this->_callerServices = $caller;
     }
