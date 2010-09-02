@@ -198,6 +198,15 @@ abstract class PluginPayment extends BasePayment
   }
   
   /**
+   * Make sure state is an integer even if it is coming from the database
+   * @return integer
+   */
+  public final function getState()
+  {
+  	return intval($this->_get('state'));
+  }
+  
+  /**
    * Resets the target amount
    * @param mixed $amount Anything that can be correctly converted to a float.
    */

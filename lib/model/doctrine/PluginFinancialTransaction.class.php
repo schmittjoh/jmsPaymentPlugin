@@ -186,6 +186,15 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
   }
   
   /**
+   * Make sure is an integer even when the payment is coming from the database
+   * @return integer
+   */
+  public final function getState()
+  {
+  	return intval($this->_get('state'));
+  }
+  
+  /**
    * Sets the state of this transaction. There should never be a case where you
    * need to call this method manually. If you temper with the transaction's
    * state, this might cause huge problems later on.
