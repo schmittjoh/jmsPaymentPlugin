@@ -47,4 +47,9 @@ class jmsPaymentException extends Exception
   {
     return $this->_paymentMethodData;
   }
+  
+  public final static function fromException(Exception $e)
+  {
+  	return new jmsPaymentException($e->getMessage());
+  }
 }
