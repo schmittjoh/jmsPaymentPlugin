@@ -1,0 +1,31 @@
+options:
+  type:         InnoDB
+  charset:      utf8
+  collate:      utf8_unicode_ci
+
+PaypalPaymentData:
+  inheritance:
+    extends: PaymentData
+    type: column_aggregation
+    keyField: method_class_name
+    keyValue: jmsPaypalPaymentMethod
+  columns:
+    express_token:
+      type: string(30)
+      notnull: false
+      default: null
+    express_url:
+      type: string(2048)
+      notnull: false
+      default: null
+    cancel_url:
+      type: string(2048)
+      notnull: true
+    return_url:
+      type: string(2048)
+      notnull: true
+    payer_id: 
+      type: string(255)
+      notnull: false
+      default: null
+    
