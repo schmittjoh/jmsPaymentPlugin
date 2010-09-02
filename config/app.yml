@@ -2,6 +2,10 @@ all:
   jmsPaymentPlugin:
     # You can overwrite these values in your global app.yml
     paypal:
-      username: 'Your paypal username'
-      signature: 'Your paypal signature'
-      password: 'Your paypal password'
+      # PayPal API credentials
+      username: ~
+      signature: ~
+      password: ~
+      
+      # Whether people need a verified PayPal account for payments
+      verified_account_required: false
