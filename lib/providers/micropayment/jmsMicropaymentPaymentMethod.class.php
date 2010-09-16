@@ -9,7 +9,11 @@ abstract class jmsMicropaymentPaymentMethod extends jmsPaymentMethod
   
   public function __construct()
   {
-  	require_once sfConfig::get('sf_lib_dir').'/vendor/micropayment/lib/init.php';
+  	$baseDir = sfConfig::get('sf_lib_dir').'/vendor/micropayment/';
+  	
+  	require_once $baseDir.'lib/init.php';
+  	require_once $baseDir.'lib/dispatcher/TNvpServiceDispatcher.php';
+  	require_once $baseDir.'services/'.$this->getServiceInterface().'.php';
   }
   
   /**

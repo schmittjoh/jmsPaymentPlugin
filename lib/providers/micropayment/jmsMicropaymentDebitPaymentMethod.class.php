@@ -18,8 +18,8 @@
 /**
  * Implements the payment method for Micropayment's debit payment.
  * 
- * This class expects the Micropayment-Service-Client (MSC) somewhere where it
- * can be autoloaded by symfony (e.g. the lib/vendor directory).
+ * This class expects the Micropayment-Service-Client (MSC) in 
+ * lib/vendor/micropayment.
  * 
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
@@ -74,6 +74,7 @@ class jmsMicropaymentDebitPaymentMethod extends jmsMicropaymentPaymentMethod
 	    );
 	    
 	    $data->setResponseCode($result['status']);
+	    $data->setProcessedAmount($data->getAmount());
 	    $data['external_reference_number'] = $result['sessionId'];
 		}
 		catch (Exception $e)
@@ -97,6 +98,9 @@ class jmsMicropaymentDebitPaymentMethod extends jmsMicropaymentPaymentMethod
       );
       
       $data->setResponseCode($result['status']);
+      
+      if ($result['status'] === 'APPROVED')
+        $data->setProcessedAmount($data->getAmount());
     }
     catch (Exception $e)
     {
