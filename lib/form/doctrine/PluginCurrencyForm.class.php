@@ -19,9 +19,9 @@
 /**
  * PluginCurrency form.
  *
- * @package    ##PROJECT_NAME##
+ * @package    jmsPaymentPlugin
  * @subpackage form
- * @author     ##AUTHOR_NAME##
+ * @author     Johannes M. Schmitt <schmittjoh@gmail.com>
  * @version    SVN: $Id: sfDoctrineFormPluginTemplate.php 23810 2009-11-12 11:07:44Z Kris.Wallsmith $
  */
 abstract class PluginCurrencyForm extends BaseCurrencyForm

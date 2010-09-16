@@ -8,11 +8,11 @@
       $(this).parent().parent().siblings('tr:contains("Method")').each(function() {
         if ($(this).is(':contains("'+selected+'")'))
         {
-        	  $(this).show();
+            $(this).show();
         }
         else
         {
-        	  $(this).hide();
+            $(this).hide();
         }
       });
       

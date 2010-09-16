@@ -1,13 +1,13 @@
 <?php
 class PaymentDemoForm extends BaseForm
 {
-	private static $paymentMethods = array(
-	  'MicropaymentDebit' => 'Micropayment Debit',
-	  'Paypal' => 'PayPal',
-	);
-	
-	public function configure()
-	{
+  private static $paymentMethods = array(
+    'MicropaymentDebit' => 'Micropayment Debit',
+    'Paypal' => 'PayPal',
+  );
+  
+  public function configure()
+  {
     $w = $this->widgetSchema;
     $v = new PaymentDemoValidatorSchema();
     $v->setPaymentMethods(array_keys(self::$paymentMethods));
@@ -43,23 +43,23 @@ class PaymentDemoForm extends BaseForm
     // data for different payment methods
     foreach (array_keys(self::$paymentMethods) as $method)
     {
-    	$formClass = $method.'PaymentDataForm';
-    	$this->embedForm('method_'.$method, new $formClass());
+      $formClass = $method.'PaymentDataForm';
+      $this->embedForm('method_'.$method, new $formClass());
     }
 
     $w->setNameFormat('paymentDemoForm[%s]');
-	}
-	
-	public function getPaymentData()
-	{
-		if ($this->isValid() === false)
-		  throw new LogicException('This method is only available on valid forms.');
-		  
-		$method = $this->getValue('method');
-		$methodValues = $this->getValue('method_'.$method);
-		
-		$methodForm = $this->getEmbeddedForm('method_'.$method);
-		
-		return $methodForm->updateObject($methodValues);
-	}
+  }
+  
+  public function getPaymentData()
+  {
+    if ($this->isValid() === false)
+      throw new LogicException('This method is only available on valid forms.');
+      
+    $method = $this->getValue('method');
+    $methodValues = $this->getValue('method_'.$method);
+    
+    $methodForm = $this->getEmbeddedForm('method_'.$method);
+    
+    return $methodForm->updateObject($methodValues);
+  }
 }

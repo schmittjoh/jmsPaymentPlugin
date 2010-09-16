@@ -19,22 +19,22 @@
 /**
  * PluginPaymentData form.
  *
- * @package    ##PROJECT_NAME##
+ * @package    jmsPaymentPlugin
  * @subpackage form
- * @author     ##AUTHOR_NAME##
+ * @author     Johannes M. Schmitt <schmittjoh@gmail.com>
  * @version    SVN: $Id: sfDoctrineFormPluginTemplate.php 23810 2009-11-12 11:07:44Z Kris.Wallsmith $
  */
 abstract class PluginPaymentDataForm extends BasePaymentDataForm
 {
-	public function configure()
-	{
-		parent::configure();
-		
-		unset(
-		  $this['payment_id'],
-		  $this['method_class_name'],
-		  $this['created_at'],
-		  $this['updated_at']
-		);
-	}
+  public function configure()
+  {
+    parent::configure();
+    
+    unset(
+      $this['payment_id'],
+      $this['method_class_name'],
+      $this['created_at'],
+      $this['updated_at']
+    );
+  }
 }

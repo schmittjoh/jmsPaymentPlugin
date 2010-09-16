@@ -18,8 +18,8 @@
 /**
  * jmsPaymentPlugin configuration.
  * 
- * @package     prometheus
- * @subpackage  payment
+ * @package     jmsPaymentPlugin
+ * @subpackage  config
  * @author      Johannes M. Schmitt <schmittjoh@gmail.com>
  * @version     SVN: $Id: PluginConfiguration.class.php 17207 2009-04-10 15:36:26Z Kris.Wallsmith $
  */

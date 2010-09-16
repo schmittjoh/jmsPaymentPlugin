@@ -39,8 +39,8 @@ abstract class BasepaymentDemoActions extends sfActions
     $this->redirect('paymentDemo/index');    
   }
   
-	public function executeApprove(sfWebRequest $request)
-	{
+  public function executeApprove(sfWebRequest $request)
+  {
     $payment = $this->getPaymentFromRequest($request);            
     $this->forward404Unless($payment);
     
@@ -52,16 +52,16 @@ abstract class BasepaymentDemoActions extends sfActions
         if (!$transaction instanceof FinancialApproveTransaction)
           throw new LogicException('This payment has another pending transaction.');
           
-      	$transaction->execute();
+        $transaction->execute();
       }
       else
       {
-      	$payment->approve();
+        $payment->approve();
       }
     }
     catch (jmsPaymentException $e)
     {
-    	// for now there is only one action, so we do not need additional
+      // for now there is only one action, so we do not need additional
       // processing here
       if ($e instanceof jmsPaymentUserActionRequiredException
           && $e->getAction() instanceof jmsPaymentUserActionVisitURL)
@@ -80,61 +80,61 @@ abstract class BasepaymentDemoActions extends sfActions
     
     $this->getUser()->setFlash('notice', 'The payment was approved successfully.');
     $this->redirect('paymentDemo/index');
-	}
-	
-	public function executeCreate(sfWebRequest $request)
-	{
-		$this->form = new PaymentDemoForm();
-		
-		if ($request->hasParameter('paymentDemoForm'))
-		{
-			$this->form->bind($request->getParameter('paymentDemoForm'));
-			
-			if ($this->form->isValid())
-			{
-				$data = $this->form->getPaymentData();
-				$data->subject = 'Test #ABC123';
-				$data->internal_reference_number = 'ABC123';
-				
-				// if this is used in a production system, I would recommend moving this to
-				// the PaypalPaymentDataForm directly to keep your action as generic as possible
-				if ($data instanceof PaypalPaymentData)
-				{
-					$data->return_url = $this->context->getController()->genUrl(array(
-					  'module' => 'paymentDemo',
-					  'action' => 'approve',
-					), true);
-					
-					$data->cancel_url = $this->context->getController()->genUrl(array(
-					  'module' => 'paymentDemo',
-					  'action' => 'cancel',
-					), true);
-				}
-				
-				$payment = Payment::create(
-				  $this->form->getValue('amount'),
-				  $this->form->getValue('currency'),
-				  $data
-				);
-				
-				$this->getUser()->setFlash('notice', 'Your payment has been created successfully.');
-				$this->redirect('paymentDemo/index');
-			}
-		}
-	}
-	
-	public function executeIndex(sfWebRequest $request)
-	{
-		$this->payments = Doctrine_Core::getTable('Payment')->createQuery('p')
-		                    ->innerJoin('p.DataContainer d')
-		                    ->leftJoin('p.Transactions t')
-		                    ->orderBy('p.id DESC')
-		                    ->execute();
-	}
-	
-	protected function getPaymentFromRequest(sfWebRequest $request)
-	{
-	  if ($request->hasParameter('token'))
+  }
+  
+  public function executeCreate(sfWebRequest $request)
+  {
+    $this->form = new PaymentDemoForm();
+    
+    if ($request->hasParameter('paymentDemoForm'))
+    {
+      $this->form->bind($request->getParameter('paymentDemoForm'));
+      
+      if ($this->form->isValid())
+      {
+        $data = $this->form->getPaymentData();
+        $data->subject = 'Test #ABC123';
+        $data->internal_reference_number = 'ABC123';
+        
+        // if this is used in a production system, I would recommend moving this to
+        // the PaypalPaymentDataForm directly to keep your action as generic as possible
+        if ($data instanceof PaypalPaymentData)
+        {
+          $data->return_url = $this->context->getController()->genUrl(array(
+            'module' => 'paymentDemo',
+            'action' => 'approve',
+          ), true);
+          
+          $data->cancel_url = $this->context->getController()->genUrl(array(
+            'module' => 'paymentDemo',
+            'action' => 'cancel',
+          ), true);
+        }
+        
+        $payment = Payment::create(
+          $this->form->getValue('amount'),
+          $this->form->getValue('currency'),
+          $data
+        );
+        
+        $this->getUser()->setFlash('notice', 'Your payment has been created successfully.');
+        $this->redirect('paymentDemo/index');
+      }
+    }
+  }
+  
+  public function executeIndex(sfWebRequest $request)
+  {
+    $this->payments = Doctrine_Core::getTable('Payment')->createQuery('p')
+                        ->innerJoin('p.DataContainer d')
+                        ->leftJoin('p.Transactions t')
+                        ->orderBy('p.id DESC')
+                        ->execute();
+  }
+  
+  protected function getPaymentFromRequest(sfWebRequest $request)
+  {
+    if ($request->hasParameter('token'))
       return Doctrine_Core::getTable('Payment')->createQuery('p')
               ->innerJoin('p.DataContainer d WITH d.express_token = ?', $request->getParameter('token'))
               ->leftJoin('p.Transactions t')
@@ -146,7 +146,7 @@ abstract class BasepaymentDemoActions extends sfActions
               ->leftJoin('p.Transactions t')
               ->where('p.id = ?', $request->getParameter('id'))
               ->fetchOne();
-	  
+    
     return false;
-	}
+  }
 }

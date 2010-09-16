@@ -33,5 +33,5 @@ Please set the amount that should be processed by PayPal.
     <tr>
       <td colspan="2"><input type="submit" name="set_amount" value="Set Amount"/></td>
     </tr>
-	</table>
+  </table>
 </form>

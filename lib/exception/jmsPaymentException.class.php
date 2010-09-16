@@ -50,6 +50,6 @@ class jmsPaymentException extends Exception
   
   public final static function fromException(Exception $e)
   {
-  	return new jmsPaymentException($e->getMessage());
+    return new jmsPaymentException($e->getMessage());
   }
 }

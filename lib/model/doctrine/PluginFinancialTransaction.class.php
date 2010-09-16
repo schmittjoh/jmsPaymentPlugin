@@ -191,7 +191,7 @@ abstract class PluginFinancialTransaction extends BaseFinancialTransaction
    */
   public final function getState()
   {
-  	return intval($this->_get('state'));
+    return intval($this->_get('state'));
   }
   
   /**

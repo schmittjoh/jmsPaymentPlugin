@@ -44,16 +44,16 @@
       $(a).click(function() {
         var tr = $(this).parent().parent().next();
         
-    	  if (tr.is(':hidden'))
-    	  {
-    		  tr.show();
-    		  $(this).text('hide transactions');
-    	  }
-    	  else
-    	  {
-    		  tr.hide();
-    		  $(this).text('view transactions');
-    	  }
+        if (tr.is(':hidden'))
+        {
+          tr.show();
+          $(this).text('hide transactions');
+        }
+        else
+        {
+          tr.hide();
+          $(this).text('view transactions');
+        }
       });
     });
   });
@@ -94,41 +94,41 @@
       <td><?php 
         switch ($payment->state)
         {
-        	case Payment::STATE_APPROVED:
-        		echo 'approved';
-        		break;
-        		
-        	case Payment::STATE_APPROVING:
-        		echo 'approving';
-        		break;
-        		
-        	case Payment::STATE_CANCELED:
-        		echo 'canceled';
-        		break;
+          case Payment::STATE_APPROVED:
+            echo 'approved';
+            break;
+            
+          case Payment::STATE_APPROVING:
+            echo 'approving';
+            break;
+            
+          case Payment::STATE_CANCELED:
+            echo 'canceled';
+            break;
           
-        	case Payment::STATE_COMPLETE:
-        		echo 'complete';
-        		break;
-        		
-        	case Payment::STATE_DEPOSITING:
-        		echo 'depositing';
-        		break;
-        		
-        	case Payment::STATE_EXPIRED:
-        		echo 'expired';
-        		break;
-        		
-        	case Payment::STATE_FAILED:
-        		echo 'failed';
-        		break;
-        		
-        	case Payment::STATE_NEW:
-        		echo 'new';
-        		break;
-        		
-        	default:
-        		echo 'unknown';
-        		break;
+          case Payment::STATE_COMPLETE:
+            echo 'complete';
+            break;
+            
+          case Payment::STATE_DEPOSITING:
+            echo 'depositing';
+            break;
+            
+          case Payment::STATE_EXPIRED:
+            echo 'expired';
+            break;
+            
+          case Payment::STATE_FAILED:
+            echo 'failed';
+            break;
+            
+          case Payment::STATE_NEW:
+            echo 'new';
+            break;
+            
+          default:
+            echo 'unknown';
+            break;
         }      
       ?></td>
       <td><?php
@@ -139,16 +139,16 @@
         
         switch ($payment->state)
         {
-        	case Payment::STATE_NEW:
-        	case Payment::STATE_APPROVING:
-        		$actions[] = $approveAction;
-        		$actions[] = $cancelAction;
-        		break;
-        		
-        	case Payment::STATE_APPROVED:
-        	case Payment::STATE_DEPOSITING:
-        		$actions[] = $depositAction;
-        		break;
+          case Payment::STATE_NEW:
+          case Payment::STATE_APPROVING:
+            $actions[] = $approveAction;
+            $actions[] = $cancelAction;
+            break;
+            
+          case Payment::STATE_APPROVED:
+          case Payment::STATE_DEPOSITING:
+            $actions[] = $depositAction;
+            break;
         }
         
         echo implode(', ', $actions);

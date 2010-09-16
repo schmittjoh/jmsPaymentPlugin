@@ -19,12 +19,14 @@
 /**
  * Implements the payment method for Paypal
  * 
+ * @package jmsPaymentPlugin
+ * @subpackage providers
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
 class jmsPaypalPaymentMethod extends jmsPaymentMethod
 {
-	const API_VERSION = '2.0';
-	
+  const API_VERSION = '2.0';
+  
   /**
    * @var CallerServices
    */
@@ -62,7 +64,7 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
     }
     catch (Exception $e)
     {
-    	if (!$e instanceof jmsPaymentUserActionRequiredException && $retry)
+      if (!$e instanceof jmsPaymentUserActionRequiredException && $retry)
         return $this->approve($data, false);
       else
         throw $e;
@@ -79,10 +81,10 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
    */
   private function _approve(jmsPaymentMethodData $data)
   {
-  	if ($data->getValue('express_token') === null)
-  	  $this->generateExpressUrl($data);
-  	else
-  	  $this->verifyApproval($data);
+    if ($data->getValue('express_token') === null)
+      $this->generateExpressUrl($data);
+    else
+      $this->verifyApproval($data);
   }
   
   /**
@@ -91,7 +93,7 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
    */
   private function verifyApproval(jmsPaymentMethodData $data)
   {
-  	$expressCheckoutDetailsRequest = PayPal::getType('GetExpressCheckoutDetailsRequestType');
+    $expressCheckoutDetailsRequest = PayPal::getType('GetExpressCheckoutDetailsRequestType');
     $expressCheckoutDetailsRequest->setToken($data->getValue('express_token'));
 
     $response = $this->getCallerServices()->GetExpressCheckoutDetails($expressCheckoutDetailsRequest);
@@ -135,24 +137,24 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
 
     if (Pear::isError($response))
     {
-    	$reasonCode = $response->getMessage();
-    	$data->setReasonCode($reasonCode);
-    	$e = new jmsPaymentCommunicationException(
-    	  'Error while authorizing express checkout payment: '.$reasonCode);
-    	$e->setPaymentMethodData($data);
-    	
-    	throw $e;
+      $reasonCode = $response->getMessage();
+      $data->setReasonCode($reasonCode);
+      $e = new jmsPaymentCommunicationException(
+        'Error while authorizing express checkout payment: '.$reasonCode);
+      $e->setPaymentMethodData($data);
+      
+      throw $e;
     }
       
     if ($response->Ack !== 'Success')
     {
-    	$reasonCode = $this->extractErrors($response->Errors);
-    	$data->setReasonCode($reasonCode);
-    	$data->setResponseCode($response->Ack);
-    	$e = new jmsPaymentException('Payment could not be authorized: '.$reasonCode);
-    	$e->setPaymentMethodData($data);
-    	
-    	throw $e;
+      $reasonCode = $this->extractErrors($response->Errors);
+      $data->setReasonCode($reasonCode);
+      $data->setResponseCode($response->Ack);
+      $e = new jmsPaymentException('Payment could not be authorized: '.$reasonCode);
+      $e->setPaymentMethodData($data);
+      
+      throw $e;
     }
                    
     $details = $response->getDoExpressCheckoutPaymentResponseDetails();
@@ -197,12 +199,12 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
       
     if ($request->Ack !== 'Success')
     {
-    	$reasonCode = $this->extractErrors($request->Errors);
-    	$data->setReasonCode($reasonCode);
-    	$e = new jmsPaymentException('Error when retrieving the express url: '.$reasonCode);
-    	$e->setPaymentMethodData($data);
-    	
-    	throw $e;
+      $reasonCode = $this->extractErrors($request->Errors);
+      $data->setReasonCode($reasonCode);
+      $e = new jmsPaymentException('Error when retrieving the express url: '.$reasonCode);
+      $e->setPaymentMethodData($data);
+      
+      throw $e;
     }
       
     $host = !$this->isDebug() ? 
@@ -270,10 +272,10 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
         return $data;
         
       case 'Pending':
-      	$e = new jmsPaymentException('Payment is still pending; reason: '.$paymentInfo->PendingReason);
-      	$data->setReasonCode($paymentInfo->PendingReason);
-      	$e->setPaymentMethodData($data);
-      	throw $e;
+        $e = new jmsPaymentException('Payment is still pending; reason: '.$paymentInfo->PendingReason);
+        $data->setReasonCode($paymentInfo->PendingReason);
+        $e->setPaymentMethodData($data);
+        throw $e;
         
       default:
         // TODO: Some more processing as to what went wrong exactly
@@ -285,17 +287,17 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
   
   protected function extractErrors($errors)
   {
-  	if (is_array($errors))
-  	{
-	  	$messages = '';
-	  	
-	  	foreach ($errors as $error)
-	  	  $messages .= $error->LongMessage."\n";
-	  	  
+    if (is_array($errors))
+    {
+      $messages = '';
+      
+      foreach ($errors as $error)
+        $messages .= $error->LongMessage."\n";
+        
       return trim($messages);
-  	}
-  	
-  	return $errors->LongMessage;
+    }
+    
+    return $errors->LongMessage;
   }
   
   /**
@@ -350,10 +352,10 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
    */
   protected function verifiedAccountRequired()
   {
-  	$config = sfConfig::get('app_jmsPaymentPlugin_paypal');
-  	
-  	return isset($config['verified_account_required'])
-  	       && $config['verified_account_required'] === true;
+    $config = sfConfig::get('app_jmsPaymentPlugin_paypal');
+    
+    return isset($config['verified_account_required'])
+           && $config['verified_account_required'] === true;
   }
   
   /**
