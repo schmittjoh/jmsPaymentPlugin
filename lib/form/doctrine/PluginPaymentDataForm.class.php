@@ -26,4 +26,15 @@
  */
 abstract class PluginPaymentDataForm extends BasePaymentDataForm
 {
+	public function configure()
+	{
+		parent::configure();
+		
+		unset(
+		  $this['payment_id'],
+		  $this['method_class_name'],
+		  $this['created_at'],
+		  $this['updated_at']
+		);
+	}
 }

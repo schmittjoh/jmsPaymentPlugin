@@ -26,4 +26,10 @@
  */
 abstract class PluginPaypalPaymentDataForm extends BasePaypalPaymentDataForm
 {
+	public function configure()
+	{
+		parent::configure();
+		
+		$this->useFields(array());
+	}
 }

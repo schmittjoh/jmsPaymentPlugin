@@ -62,7 +62,7 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
     }
     catch (Exception $e)
     {
-      if (!$e instanceof jmsPaymentUserActionRequiredException && $retry)
+    	if (!$e instanceof jmsPaymentUserActionRequiredException && $retry)
         return $this->approve($data, false);
       else
         throw $e;
@@ -134,12 +134,26 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
                  ->DoExpressCheckoutPayment($doExpressCheckoutPaymentRequest);
 
     if (Pear::isError($response))
-      throw new jmsPaymentCommunicationException(
-        'Error while authorizing express checkout payment: '.$response->getMessage());
+    {
+    	$reasonCode = $response->getMessage();
+    	$data->setReasonCode($reasonCode);
+    	$e = new jmsPaymentCommunicationException(
+    	  'Error while authorizing express checkout payment: '.$reasonCode);
+    	$e->setPaymentMethodData($data);
+    	
+    	throw $e;
+    }
       
     if ($response->Ack !== 'Success')
-      throw new jmsPaymentCommunicationException(
-          'Payment could not be authorized: '.$response->Ack);
+    {
+    	$reasonCode = $this->extractErrors($response->Errors);
+    	$data->setReasonCode($reasonCode);
+    	$data->setResponseCode($response->Ack);
+    	$e = new jmsPaymentException('Payment could not be authorized: '.$reasonCode);
+    	$e->setPaymentMethodData($data);
+    	
+    	throw $e;
+    }
                    
     $details = $response->getDoExpressCheckoutPaymentResponseDetails();
     $paymentInfo = $details->getPaymentInfo();
@@ -175,21 +189,22 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
     
     $request = $this->getCallerServices()
                 ->SetExpressCheckout($expressCheckoutRequest);
-
+                
     if (Pear::isError($request))
       throw new jmsPaymentCommunicationException(
         'Error when retrieving the express URL: '.$request->getMessage()
       );
-    
+      
     if ($request->Ack !== 'Success')
-      throw new jmsPaymentCommunicationException(
-        'Error ('.$request->Ack.') when retrieving the express URL: '
-        .(
-           is_array($request->Errors) ? 
-           implode(', ', $request->Errors) : var_export($request->Errors, true)
-        )
-      );
-    
+    {
+    	$reasonCode = $this->extractErrors($request->Errors);
+    	$data->setReasonCode($reasonCode);
+    	$e = new jmsPaymentException('Error when retrieving the express url: '.$reasonCode);
+    	$e->setPaymentMethodData($data);
+    	
+    	throw $e;
+    }
+      
     $host = !$this->isDebug() ? 
               'www.paypal.com' : 'www.sandbox.paypal.com';
 
@@ -240,7 +255,7 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
     $response = $result->getDoCaptureResponseDetails();
     $paymentInfo = $response->getPaymentInfo();
     
-    $data->setReasonCode($paymentInfo->getReasonCode());
+    $data->setResponseCode($paymentInfo->PaymentStatus);
     $data->setProcessedAmount($data->getAmount());
     
     // process the payment status
@@ -256,7 +271,7 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
         
       case 'Pending':
       	$e = new jmsPaymentException('Payment is still pending; reason: '.$paymentInfo->PendingReason);
-      	$data->setResponseCode('Pending: '.$paymentInfo->PendingReason);
+      	$data->setReasonCode($paymentInfo->PendingReason);
       	$e->setPaymentMethodData($data);
       	throw $e;
         
@@ -266,6 +281,21 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
         $e->setPaymentMethodData($data);
         throw $e; 
     }
+  }
+  
+  protected function extractErrors($errors)
+  {
+  	if (is_array($errors))
+  	{
+	  	$messages = '';
+	  	
+	  	foreach ($errors as $error)
+	  	  $messages .= $error->LongMessage."\n";
+	  	  
+      return trim($messages);
+  	}
+  	
+  	return $errors->LongMessage;
   }
   
   /**
