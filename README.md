@@ -6,7 +6,7 @@ jmsPaymentPlugin is designed to provide a generic persistence layer for processi
 * It is not coupled to any specific payment provider, or process flow.
 * It does not make assumptions about your domain model.
 * It has a flexible event system that allows you to hook into the payment process without altering payment classes.
-* It is easy to add new payment methods.
+* It is easy to add new payment methods (support for PayPal, and Micropayment already built-in)
 * It is robust, and stable due to many unit tests.
 
 
