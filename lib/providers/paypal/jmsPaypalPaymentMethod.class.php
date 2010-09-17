@@ -237,7 +237,7 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
     $amount = PayPal::getType('BasicAmountType');
     $amount->setattr('currencyID', $data->getCurrency());
     $amount->setval(number_format($data->getAmount(), 2)); 
-      
+
     $captureRequest = Paypal::getType('DoCaptureRequestType');
     $captureRequest->setAmount($amount);
     $captureRequest->setAuthorizationId($data->getValue('external_reference_number'));

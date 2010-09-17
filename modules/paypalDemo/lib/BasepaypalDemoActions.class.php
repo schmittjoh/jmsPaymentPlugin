@@ -87,7 +87,7 @@ abstract class BasepaypalDemoActions extends sfActions
     try 
     {
       if ($payment->hasOpenTransaction())
-        $payment->getOpenTransaction()->execute();
+        $payment->performTransaction($payment->getOpenTransaction());
       else
         $payment->deposit();
     }
@@ -115,7 +115,7 @@ abstract class BasepaypalDemoActions extends sfActions
     {
       if ($payment->hasOpenTransaction())
       {
-        $payment->getOpenTransaction()->execute();
+        $payment->performTransaction($payment->getOpenTransaction());
       }
       else
       {
