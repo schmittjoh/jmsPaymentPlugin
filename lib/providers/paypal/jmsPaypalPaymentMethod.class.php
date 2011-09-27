@@ -386,6 +386,11 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
                   
       $caller = PayPal::getCallerServices($profile);
       
+        
+      if (PayPal::isError($caller))
+        throw new RuntimeException('The API Caller could not be initialized: '
+                                   .$caller->getMessage());
+        
       // if we are in debug mode, ignore any invalid SSL certificates
       // TODO: Check if we also need this in production
       if ($this->isDebug())
@@ -393,11 +398,7 @@ class jmsPaypalPaymentMethod extends jmsPaymentMethod
         $caller->setOpt('curl', CURLOPT_SSL_VERIFYPEER, 0);
         $caller->setOpt('curl', CURLOPT_SSL_VERIFYHOST, 0);
       }
-        
-      if (PayPal::isError($caller))
-        throw new RuntimeException('The API Caller could not be initialized: '
-                                   .$caller->getMessage());
-        
+
       $this->_callerServices = $caller;
     }
         
